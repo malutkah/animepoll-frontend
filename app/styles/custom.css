@@ -1,0 +1,48 @@
+:root {
+  --color-indigo: #4f46e5;
+  --color-purple: #9333ea;
+  --color-pink: #f472b6;
+  --color-teal: #14b8a6;
+  --color-yellow: #fcd34d;
+  --color-green: #10b981;
+}
+
+.dark {
+  --color-indigo: #6366f1;
+  --color-purple: #a855f7;
+  --color-pink: #ec4899;
+  --color-teal: #2dd4bf;
+  --color-yellow: #fbbf24;
+  --color-green: #34d399;
+}
+
+body {
+  @apply bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800;
+}
+
+.dark body {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239333ea' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.btn {
+  @apply font-bold py-2 px-4 rounded transition duration-300;
+}
+
+.btn-primary {
+  @apply bg-indigo-600 hover:bg-indigo-700 text-white;
+}
+
+.btn-secondary {
+  @apply bg-pink-500 hover:bg-pink-600 text-white;
+}
+
+.input {
+  @apply mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+/* Add more custom styles as needed */
+
