@@ -18,16 +18,16 @@ interface BarChartProps {
 
 // Generate random colors for each dataset
 const generateColors = () => {
-    const r = Math.floor(150 + Math.random() * 106); // random number between 150 and 255
+    const r = Math.floor(150 + Math.random() * 106); // random between 150 and 255
     const g = Math.floor(150 + Math.random() * 106);
     const b = Math.floor(150 + Math.random() * 106);
-    const bgColor = `rgba(${r}, ${g}, ${b}, 0.2)`;
+    const bgColor = `rgba(${r}, ${g}, ${b}, 1)`;
     const borderColor = `rgba(${r}, ${g}, ${b}, 1)`;
     return { bgColor, borderColor };
 };
 
 const BarChart = (props: BarChartProps) => {
-    // The maximum value on the x-axis is the total count of answers
+    // The maximum value on the x-axis is the total count of responses for the question.
     const totalCount = props.answerValues.reduce((acc, curr) => acc + curr.count, 0);
 
     const barDataset = props.answerValues.map((value) => {
