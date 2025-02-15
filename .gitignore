@@ -6,6 +6,10 @@
 .pnp.js
 .yarn/install-state.gz
 
+*.exe
+*.lnk
+*.ps1
+
 # testing
 /coverage
 
