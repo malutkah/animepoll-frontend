@@ -22,6 +22,7 @@ interface Question {
     possible_answers: string[]
 }
 
+
 const EditSurveyPage = () => {
     const params = useParams() as { surveyId: string }
     const router = useRouter()
@@ -46,6 +47,21 @@ const EditSurveyPage = () => {
     const [questions, setQuestions] = useState<Question[]>([])
     const [activeContextMenu, setActiveContextMenu] = useState<string | null>(null)
     const [editingQuestion, setEditingQuestion] = useState<Question | null>(null)
+
+    const [disableQuestion, setDisableQuestion] = useState(true)
+    const [disableSurvey, setDisableSurvey] = useState(false)
+
+    const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none"
+
+    const checkVisibility = (value: string) => {
+        if (value === 'public' && (!questions || questions.length === 0)) {
+            // disable 'update survey'
+            setDisableSurvey(true)
+        } else {
+            setDisableSurvey(false);
+        }
+        setVisibility(value)
+    };
 
     const fetchSurvey = async () => {
         try {
@@ -215,7 +231,7 @@ const EditSurveyPage = () => {
                                 <label className="block font-medium">Visibility</label>
                                 <select
                                     value={visibility}
-                                    onChange={(e) => setVisibility(e.target.value)}
+                                    onChange={(e) => checkVisibility(e.target.value)}
                                     className="border p-2 w-full rounded"
                                 >
                                     <option value="public">Public</option>
@@ -224,8 +240,8 @@ const EditSurveyPage = () => {
                             </div>
                             <button
                                 type="submit"
-                                disabled={updateLoading}
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+                                disabled={updateLoading || disableSurvey}
+                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${disableSurvey ? disabledButtonClasses : ''}`}
                             >
                                 {updateLoading ? "Updating..." : "Update Survey"}
                             </button>
@@ -245,7 +261,10 @@ const EditSurveyPage = () => {
                             <input
                                 type="text"
                                 value={questionText}
-                                onChange={(e) => setQuestionText(e.target.value)}
+                                onChange={(e) => {
+                                    setDisableQuestion(e.target.value === '')
+                                    setQuestionText(e.target.value)
+                                }}
                                 className="border p-2 w-full rounded"
                                 required
                             />
@@ -262,7 +281,7 @@ const EditSurveyPage = () => {
                             </select>
                         </div>
                         {questionType === "multiple-choice" ? (
-                            <DynamicOptionsInput options={options} onChange={setOptions} />
+                            <DynamicOptionsInput options={options} onChange={setOptions}/>
                         ) : (
                             <div>
                                 <label className="block font-medium">Possible Answers (for text questions, leave blank)</label>
@@ -270,8 +289,8 @@ const EditSurveyPage = () => {
                         )}
                         <button
                             type="submit"
-                            disabled={questionLoading}
-                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                            disabled={questionLoading || disableQuestion}
+                            className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded disabled:bg-gray-600 ${disableQuestion ? disabledButtonClasses : ""}`}
                         >
                             {questionLoading ? "Creating..." : "Create Question"}
                         </button>
@@ -281,11 +300,11 @@ const EditSurveyPage = () => {
                 {/* Existing Questions List */}
                 <div className="border-t pt-8">
                     <h2 className="text-2xl font-bold mb-4">Existing Questions</h2>
-                    {questions.length === 0 ? (
+                    {!questions || questions.length === 0 ? (
                         <p>No questions found.</p>
                     ) : (
                         <ul className="space-y-4">
-                            {questions.map((question) => (
+                            {questions && questions.map((question) => (
                                 <li key={question.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow relative">
                                     <p className="font-medium text-gray-800 dark:text-gray-100">{question.survey_text}</p>
                                     <p className="text-sm text-gray-600 dark:text-gray-300">Type: {question.type}</p>

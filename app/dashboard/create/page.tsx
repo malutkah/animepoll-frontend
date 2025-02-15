@@ -8,7 +8,7 @@ import { authFetch } from "@/lib/api"
 const CreateSurveyPage = () => {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
-    const [visibility, setVisibility] = useState('public')
+    const [visibility, setVisibility] = useState('private')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
@@ -67,7 +67,7 @@ const CreateSurveyPage = () => {
                             onChange={(e) => setVisibility(e.target.value)}
                             className="border p-2 w-full"
                         >
-                            <option value="public">Public</option>
+                            {/*<option value="public">Public</option>*/}
                             <option value="private">Private</option>
                         </select>
                     </div>

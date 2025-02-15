@@ -46,19 +46,31 @@ const LandingPage = () => {
 
             <div className="space-x-4">
                 <Link
-                    href=""
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
+                    href="/signup"
+                    aria-disabled={true}
+                    className="pointer-events-none bg-gray-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
                     Get Started
                 </Link>
                 <Link
-                    href=""
-                    className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
+                    href="/login"
+                    className="pointer-events-none bg-gray-600 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
+
+                    aria-disabled={true}
                 >
                     Login
                 </Link>
-                <Link href={"/prelaunch-signup"} className={"bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"}>
+                <Link
+                    href={"/prelaunch-signup"}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
+                >
                     Sign Up for Pre-Launch
+                </Link>
+                <Link
+                    href="/discover"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
+                >
+                    Discover Polls
                 </Link>
             </div>
         </div>

@@ -2,11 +2,13 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import ThemeToggle from "./ThemeToggle"
 
 const Navbar = () => {
     const [loggedIn, setLoggedIn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -14,6 +16,13 @@ const Navbar = () => {
             setLoggedIn(!!token)
         }
     }, [])
+
+    const handleLogout = () => {
+        // Clear token and related data then redirect to landing page
+        localStorage.removeItem("token")
+        localStorage.removeItem("expires_at")
+        router.push("/")
+    }
 
     return (
         <nav className="p-4 flex justify-between items-center bg-white dark:bg-gray-800 shadow-md relative">
@@ -36,6 +45,12 @@ const Navbar = () => {
                         >
                             Profile
                         </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+                        >
+                            Logout
+                        </button>
                     </>
                 ) : (
                     <>
@@ -86,11 +101,20 @@ const Navbar = () => {
                                 </Link>
                                 <Link
                                     href="/profile"
-                                    className="block text-gray-600 dark:text-gray-300 hover:text-indigo-600"
+                                    className="block mb-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600"
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     Profile
                                 </Link>
+                                <button
+                                    onClick={() => {
+                                        handleLogout()
+                                        setMenuOpen(false)
+                                    }}
+                                    className="block text-gray-600 dark:text-gray-300 hover:text-red-600"
+                                >
+                                    Logout
+                                </button>
                             </>
                         ) : (
                             <>

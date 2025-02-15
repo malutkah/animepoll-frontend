@@ -57,9 +57,10 @@ const DashboardPage = () => {
     }
 
     // Filter surveys based on search term
-    const filteredSurveys = surveys.filter(survey =>
+    const filteredSurveys = surveys && surveys.filter(survey =>
         survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         survey.description.toLowerCase().includes(searchTerm.toLowerCase())
+
     )
 
     return (
@@ -85,12 +86,12 @@ const DashboardPage = () => {
                 </div>
                 {error && <p className="text-red-500 mt-4">{error}</p>}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredSurveys.length === 0 ? (
+                    {!filteredSurveys || filteredSurveys.length === 0 ? (
                         <p>No surveys found.</p>
                     ) : (
-                        filteredSurveys.map((survey) => (
-                            <div key={survey.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">{survey.title}</h2>
+                        filteredSurveys && filteredSurveys.map((survey) => (
+                            <div key={survey.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 break-all">
+                                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-wrap">{survey.title}</h2>
                                 <p className="text-gray-600 dark:text-gray-300 mt-2">{survey.description}</p>
                                 <div className="mt-4 flex space-x-2">
                                     <Link
