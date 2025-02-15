@@ -22,7 +22,6 @@ interface Question {
     possible_answers: string[]
 }
 
-
 const EditSurveyPage = () => {
     const params = useParams() as { surveyId: string }
     const router = useRouter()
@@ -54,14 +53,14 @@ const EditSurveyPage = () => {
     const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none"
 
     const checkVisibility = (value: string) => {
-        if (value === 'public' && (!questions || questions.length === 0)) {
+        if (value === "public" && (!questions || questions.length === 0)) {
             // disable 'update survey'
             setDisableSurvey(true)
         } else {
-            setDisableSurvey(false);
+            setDisableSurvey(false)
         }
         setVisibility(value)
-    };
+    }
 
     const fetchSurvey = async () => {
         try {
@@ -127,20 +126,29 @@ const EditSurveyPage = () => {
         }
     }
 
-    // Handle question creation
+    // Handle question creation with safety feature
     const handleQuestionCreate = async (e: React.FormEvent) => {
         e.preventDefault()
         setQuestionLoading(true)
         setQuestionError("")
-        let answersArray: string[] = []
+
+        // Safety check: Question text must be filled
+        if (!questionText.trim()) {
+            setQuestionError("Question text must be filled.")
+            setQuestionLoading(false)
+            return
+        }
+
+        // Safety check for multiple-choice: answer options must have at least one non-empty option
         if (questionType === "multiple-choice") {
-            answersArray = options.filter(opt => opt.trim() !== "")
+            const answersArray = options.filter(opt => opt.trim() !== "")
             if (answersArray.length === 0) {
                 setQuestionError("Please provide at least one option for multiple-choice questions.")
                 setQuestionLoading(false)
                 return
             }
         }
+
         try {
             const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`, {
                 method: "POST",
@@ -148,7 +156,7 @@ const EditSurveyPage = () => {
                 body: JSON.stringify({
                     survey_text: questionText,
                     type: questionType,
-                    possible_answers: questionType === "multiple-choice" ? answersArray : [],
+                    possible_answers: questionType === "multiple-choice" ? options.filter(opt => opt.trim() !== "") : [],
                 }),
             })
             if (!res.ok) {
@@ -191,7 +199,7 @@ const EditSurveyPage = () => {
         }
     }
 
-    const openEditModal = (question) => {
+    const openEditModal = (question: Question) => {
         setEditingQuestion(question)
         setActiveContextMenu(null)
     }
@@ -241,7 +249,7 @@ const EditSurveyPage = () => {
                             <button
                                 type="submit"
                                 disabled={updateLoading || disableSurvey}
-                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${disableSurvey ? disabledButtonClasses : ''}`}
+                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${disableSurvey ? disabledButtonClasses : ""}`}
                             >
                                 {updateLoading ? "Updating..." : "Update Survey"}
                             </button>
@@ -262,7 +270,7 @@ const EditSurveyPage = () => {
                                 type="text"
                                 value={questionText}
                                 onChange={(e) => {
-                                    setDisableQuestion(e.target.value === '')
+                                    setDisableQuestion(e.target.value === "")
                                     setQuestionText(e.target.value)
                                 }}
                                 className="border p-2 w-full rounded"
@@ -281,7 +289,7 @@ const EditSurveyPage = () => {
                             </select>
                         </div>
                         {questionType === "multiple-choice" ? (
-                            <DynamicOptionsInput options={options} onChange={setOptions}/>
+                            <DynamicOptionsInput options={options} onChange={setOptions} />
                         ) : (
                             <div>
                                 <label className="block font-medium">Possible Answers (for text questions, leave blank)</label>
@@ -304,7 +312,7 @@ const EditSurveyPage = () => {
                         <p>No questions found.</p>
                     ) : (
                         <ul className="space-y-4">
-                            {questions && questions.map((question) => (
+                            {questions.map((question) => (
                                 <li key={question.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow relative">
                                     <p className="font-medium text-gray-800 dark:text-gray-100">{question.survey_text}</p>
                                     <p className="text-sm text-gray-600 dark:text-gray-300">Type: {question.type}</p>
