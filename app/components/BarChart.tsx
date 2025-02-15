@@ -6,48 +6,40 @@ import 'chart.js/auto';
 
 Chart.register(CategoryScale);
 
-interface AnswerValues {
-    text: string
-    percentValue: number
+interface AnswerValue {
+    text: string;
+    count: number;
 }
 
 interface BarChartProps {
-    questionText: string
-    answerValues: AnswerValues[]
+    questionText: string;
+    answerValues: AnswerValue[];
 }
 
+// Generate random colors for each dataset
 const generateColors = () => {
-    let bgColor = '';
-    let borderColor = '';
-
     const r = Math.floor(150 + Math.random() * 106); // random number between 150 and 255
     const g = Math.floor(150 + Math.random() * 106);
     const b = Math.floor(150 + Math.random() * 106);
-    bgColor = `rgba(${r}, ${g}, ${b}, 0.2)`
-    borderColor = `rgba(${r}, ${g}, ${b}, 0.2)`
-
-    return {bgColor, borderColor}
-}
+    const bgColor = `rgba(${r}, ${g}, ${b}, 0.2)`;
+    const borderColor = `rgba(${r}, ${g}, ${b}, 1)`;
+    return { bgColor, borderColor };
+};
 
 const BarChart = (props: BarChartProps) => {
-    let barDataset = [];
-    props.answerValues.forEach((value) => {
-        const randomBgColor = generateColors().bgColor
-        const randomBorderColor = generateColors().borderColor
-        const d = {
-            label: value.text,
-            data: [value.percentValue],
-            backgroundColor: [
-                randomBgColor,
-            ],
-            borderColor: [
-                randomBorderColor
-            ],
-            borderWidth: 1
-        }
-        barDataset.push(d)
-    })
+    // The maximum value on the x-axis is the total count of answers
+    const totalCount = props.answerValues.reduce((acc, curr) => acc + curr.count, 0);
 
+    const barDataset = props.answerValues.map((value) => {
+        const { bgColor, borderColor } = generateColors();
+        return {
+            label: value.text,
+            data: [value.count],
+            backgroundColor: [bgColor],
+            borderColor: [borderColor],
+            borderWidth: 1,
+        };
+    });
 
     const data = {
         labels: [props.questionText],
@@ -55,16 +47,11 @@ const BarChart = (props: BarChartProps) => {
     };
 
     const options = {
-        indexAxis: 'y',
+        indexAxis: 'y' as const,
         scales: {
             x: {
                 beginAtZero: true,
-                max: 100, // sets maximum to 100 for percent display
-                ticks: {
-                    callback: function(value) {
-                        return value + '%'; // appends % to each tick label
-                    },
-                },
+                max: totalCount,
             },
         },
     };
@@ -73,7 +60,7 @@ const BarChart = (props: BarChartProps) => {
         <div>
             <Bar data={data} options={options} />
         </div>
-    )
-}
+    );
+};
 
 export default BarChart;
