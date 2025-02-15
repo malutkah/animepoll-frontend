@@ -4,6 +4,7 @@ import {useState, useEffect} from "react"
 import {useParams} from "next/navigation"
 import {useToast} from "@/app/components/ToastProvider"
 import {fillCacheWithNewSubTreeData} from "next/dist/client/components/router-reducer/fill-cache-with-new-subtree-data";
+import BarChart from "@/app/components/BarChart";
 
 interface Question {
     id: string;
@@ -113,6 +114,7 @@ const PublicSurveyPage = () => {
     useEffect(() => {
         fetchSurveyDetails()
         fetchQuestions()
+        fetchResults()
     }, [params.surveyId])
 
     const handleResponseChange = (questionId: string, value: string) => {
@@ -206,40 +208,45 @@ const PublicSurveyPage = () => {
                 <p>Loading questions...</p>
             )}
 
-            {results && (
+            {results ? (
                 <div className="mt-8">
+
                     <h2 className="text-3xl font-bold text-gray-800">Survey Results</h2>
                     <div className="mt-4">
                         {Object.entries(results).map(([questionId, responseArray]: [string, any]) => (
-
                                 <div key={questionId} className="p-4 border rounded-lg bg-white dark:bg-gray-800 mb-4">
-                                    <p className="font-medium text-gray-800 dark:text-gray-100">
-                                        {questions.find(q => q.id === questionId)?.survey_text || "Question"}
-                                    </p>
+
+                                    <BarChart
+                                        questionText={questions.find(q => q.id === questionId)?.survey_text || "Question"}
+                                        answerValues={[
+                                            {percentValue:responseArray.length, text:"answer text"},
+                                            {percentValue: responseArray.length / 100 * 10, text:"answer as"}
+                                        ]}
+                                    />
+
                                     <div className="mt-2 max-h-40 overflow-auto">
                                         <table className="w-full text-sm">
                                             <thead>
                                             <tr>
                                                 <th className="text-left text-gray-700 dark:text-gray-300">Answer</th>
-                                                <th className="text-left text-gray-700 dark:text-gray-300">Time</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {responseArray && responseArray.map((resp, idx) => (
                                                 <tr key={idx}>
                                                     <td className="py-1 text-gray-800 dark:text-gray-100">{resp.answer_value}</td>
-                                                    <td className="py-1 text-gray-600 dark:text-gray-300">{formatTimestamp(resp.submitted_at)}</td>
                                                 </tr>
                                             ))}
                                             </tbody>
                                         </table>
                                     </div>
+
                                 </div>
                             )
                         )}
                     </div>
                 </div>
-            )}
+            ) : <p className="font-medium text-gray-800 dark:text-gray-100">No results</p>}
         </div>
     )
 }
