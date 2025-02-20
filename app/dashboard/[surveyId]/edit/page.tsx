@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import ProtectedRoute from "../../../components/ProtectedRoute"
 import { authFetch } from "@/lib/api"
@@ -13,6 +13,7 @@ interface Survey {
     title: string
     description: string
     visibility: string
+    genre_id: string
 }
 
 interface Question {
@@ -21,6 +22,13 @@ interface Question {
     type: string
     possible_answers: string[]
 }
+
+interface AnimeGenre {
+    id: string
+    name: string
+}
+
+type AnimeGenres = AnimeGenre[]
 
 const EditSurveyPage = () => {
     const params = useParams() as { surveyId: string }
@@ -37,7 +45,6 @@ const EditSurveyPage = () => {
     // Question creation states
     const [questionText, setQuestionText] = useState("")
     const [questionType, setQuestionType] = useState("multiple-choice")
-    // Use dynamic options input for multiple-choice type
     const [options, setOptions] = useState<string[]>([""])
     const [questionError, setQuestionError] = useState("")
     const [questionLoading, setQuestionLoading] = useState(false)
@@ -50,11 +57,44 @@ const EditSurveyPage = () => {
     const [disableQuestion, setDisableQuestion] = useState(true)
     const [disableSurvey, setDisableSurvey] = useState(false)
 
+    // Genre states
+    const [genres, setGenres] = useState<AnimeGenres>([])
+    const [genreId, setGenreId] = useState("")
+    const [genre, setGenre] = useState("")
+
     const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none"
+
+    const fetchAnimeGenres = async () => {
+        try {
+            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            if (res.status !== 200) {
+                const err = await res.json()
+                setUpdateError(err.message || "Failed to load genres")
+                return
+            }
+            const data = await res.json()
+            setGenres(data)
+        } catch (err) {
+            setUpdateError("Failed getting genres")
+            console.error(err)
+        }
+    }
+
+    const handleGenreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = e.target.value
+
+        const selectedGenre = genres.find((g) => g.name === selected)
+        if (selectedGenre) {
+            setGenre(selectedGenre.name)
+            setGenreId(selectedGenre.id)
+        } else {
+            setGenre("")
+            setGenreId("")
+        }
+    }
 
     const checkVisibility = (value: string) => {
         if (value === "public" && (!questions || questions.length === 0)) {
-            // disable 'update survey'
             setDisableSurvey(true)
         } else {
             setDisableSurvey(false)
@@ -75,6 +115,8 @@ const EditSurveyPage = () => {
             setTitle(data.title)
             setDescription(data.description)
             setVisibility(data.visibility)
+            // Save the genre_id from the survey
+            setGenreId(data.genre_id)
         } catch (err) {
             setUpdateError("Failed to load survey")
         }
@@ -85,7 +127,6 @@ const EditSurveyPage = () => {
             const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`)
             if (!res.ok) {
                 const err = await res.json()
-                // Optionally handle error
                 return
             }
             const data = await res.json()
@@ -95,9 +136,20 @@ const EditSurveyPage = () => {
         }
     }
 
+    // When both survey and genres are loaded, update the genre select with the saved genre.
+    useEffect(() => {
+        if (survey && genres.length > 0) {
+            const savedGenre = genres.find((g: AnimeGenre) => g.id === survey.genre_id)
+            if (savedGenre) {
+                setGenre(savedGenre.name) // set the select value to the genre id
+            }
+        }
+    }, [survey, genres])
+
     useEffect(() => {
         fetchSurvey()
         fetchQuestions()
+        fetchAnimeGenres()
     }, [params.surveyId])
 
     // Handle survey update
@@ -109,7 +161,7 @@ const EditSurveyPage = () => {
             const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, visibility }),
+                body: JSON.stringify({ title, description, visibility, genre_id: genreId }),
             })
             if (!res.ok) {
                 const err = await res.json()
@@ -126,20 +178,18 @@ const EditSurveyPage = () => {
         }
     }
 
-    // Handle question creation with safety feature
+    // Handle question creation with safety feature and limit options to 5
     const handleQuestionCreate = async (e: React.FormEvent) => {
         e.preventDefault()
         setQuestionLoading(true)
         setQuestionError("")
 
-        // Safety check: Question text must be filled
         if (!questionText.trim()) {
             setQuestionError("Question text must be filled.")
             setQuestionLoading(false)
             return
         }
 
-        // Safety check for multiple-choice: answer options must have at least one non-empty option
         if (questionType === "multiple-choice") {
             const answersArray = options.filter(opt => opt.trim() !== "")
             if (answersArray.length === 0) {
@@ -236,6 +286,24 @@ const EditSurveyPage = () => {
                                 />
                             </div>
                             <div>
+                                <label className="block font-medium">Genre</label>
+                                {genres && genres.length > 0 ? (
+                                    <select
+                                        value={genre}
+                                        onChange={handleGenreSelect}
+                                        className="border p-2 w-full rounded"
+                                        required
+                                    >
+                                        <option value={""}>Select a Genre</option>
+                                        {genres.map((g) => (
+                                            <option key={g.id} value={g.name}>{g.name}</option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <p>Loading Genres</p>
+                                )}
+                            </div>
+                            <div>
                                 <label className="block font-medium">Visibility</label>
                                 <select
                                     value={visibility}
@@ -289,7 +357,7 @@ const EditSurveyPage = () => {
                             </select>
                         </div>
                         {questionType === "multiple-choice" ? (
-                            <DynamicOptionsInput options={options} onChange={setOptions} />
+                            <DynamicOptionsInput options={options} onChange={setOptions} maxOptions={5} />
                         ) : (
                             <div>
                                 <label className="block font-medium">Possible Answers (for text questions, leave blank)</label>
@@ -368,4 +436,4 @@ const EditSurveyPage = () => {
     )
 }
 
-export default EditSurveyPage
+export default EditSurveyPage;
