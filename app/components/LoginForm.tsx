@@ -53,7 +53,7 @@ const LoginForm = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 name="email"
                 value={email}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ const LoginForm = () => {
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
@@ -78,14 +78,14 @@ const LoginForm = () => {
             {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-            Sign up
-          </Link>
-        </p>
+          <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+              Sign up
+            </Link>
+          </p>
       </div>
-  )
+)
 }
 
 export default LoginForm
