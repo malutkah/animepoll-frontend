@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import {authFetch} from "@/lib/api";
+import { authFetch } from "@/lib/api"
 
 interface Survey {
     id: string;
@@ -28,7 +28,7 @@ const DiscoverPage = () => {
             const res = await fetch("http://localhost:8080/poll/survey/all/public")
             if (!res.ok) {
                 const err = await res.json()
-                setError(err.message|| err.error || "Failed to load public surveys")
+                setError(err.message || err.error || "Failed to load public surveys")
                 return
             }
             const data = await res.json()
@@ -43,16 +43,14 @@ const DiscoverPage = () => {
             const res = await authFetch("http://localhost:8080/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load genres");
-                return;
+                setError(err.message || "Failed to load genres")
+                return
             }
             const data = await res.json()
-            setGenres(data);
-
+            setGenres(data)
         } catch (err) {
-            setError("Failed getting genres");
+            setError("Failed getting genres")
             console.log(err)
-        } finally {
         }
     }
 
@@ -64,12 +62,9 @@ const DiscoverPage = () => {
     const getGenreName = (genreId: string) => {
         if (surveys && surveys.length) {
             const genre = genres.find((g: AnimeGenre) => g.id === genreId)
-            if (genre) {
-                return genre.name
-            } else {
-                return "No genre";
-            }
+            return genre ? genre.name : "No genre"
         }
+        return ""
     }
 
     return (
@@ -81,9 +76,12 @@ const DiscoverPage = () => {
                     <p>No public surveys found.</p>
                 ) : (
                     surveys.map((survey) => (
-                        <div key={survey.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 break-all">
-                            <div className={"flex justify-end"}>
-                                <p className={"pt-0 text-indigo-400 text-sm"}>{getGenreName(survey.genre_id)}</p>
+                        <div
+                            key={survey.id}
+                            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 break-all hover:scale-105 transition-transform duration-200"
+                        >
+                            <div className="flex justify-end">
+                                <p className="pt-0 text-indigo-400 text-sm">{getGenreName(survey.genre_id)}</p>
                             </div>
                             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">{survey.title}</h2>
                             <p className="text-gray-600 dark:text-gray-300 mt-2">{survey.description}</p>
@@ -103,4 +101,4 @@ const DiscoverPage = () => {
     )
 }
 
-export default DiscoverPage;
+export default DiscoverPage

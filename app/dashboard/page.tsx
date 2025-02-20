@@ -129,7 +129,7 @@ const DashboardPage = () => {
                     ) : (
                         filteredSurveys && filteredSurveys.map((survey) => (
                             <div key={survey.id}
-                                 className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 break-all">
+                                 className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 break-all hover:scale-105 transition-transform duration-200">
                                 <div className={"flex justify-end"}>
                                     <p className={"pt-0 text-indigo-400 text-sm"}>{getGenreName(survey.genre_id)}</p>
                                 </div>
