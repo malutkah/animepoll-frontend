@@ -1,9 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import React, {useEffect, useState} from "react"
 import { useRouter } from "next/navigation"
 import ProtectedRoute from "../../components/ProtectedRoute"
 import { authFetch } from "@/lib/api"
+
+interface AnimeGenre {
+    id: string;
+    name: string;
+}
+
+type AnimeGenres = AnimeGenre[];
 
 const CreateSurveyPage = () => {
     const [title, setTitle] = useState('')
@@ -11,6 +18,9 @@ const CreateSurveyPage = () => {
     const [visibility, setVisibility] = useState('private')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [genres, setGenres] = useState<AnimeGenres | []>([])
+    const [genreId, setGenreId] = useState('')
+    const [genre, setGenre] = useState('')
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +30,7 @@ const CreateSurveyPage = () => {
             const res = await authFetch("http://localhost:8080/poll/survey", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, visibility })
+                body: JSON.stringify({ title, description, visibility, 'genre_id':genreId })
             })
             if (!res.ok) {
                 const err = await res.json()
@@ -34,6 +44,46 @@ const CreateSurveyPage = () => {
             setIsLoading(false)
         }
     }
+
+    const fetchAnimeGenres = async () => {
+        setIsLoading(true);
+
+        try {
+            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            if (res.status !== 200) {
+                const err = await res.json();
+                setError(err.message || "Failed to load genres");
+                return;
+            }
+            const data = await res.json()
+            setGenres(data);
+
+        } catch (err) {
+            setIsLoading(false);
+            setError("Failed getting genres");
+            console.log(err)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleGenreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = e.target.value;
+        console.log('selected',selected)
+
+        const g = genres.find((g) => g.name === selected);
+        console.log('g',g)
+        if (g) {
+            setGenre(g.name)
+            setGenreId(g.id)
+        } else {
+            setGenre("")
+        }
+    }
+
+    useEffect(() => {
+        fetchAnimeGenres()
+    }, []);
 
     return (
         <ProtectedRoute>
@@ -61,11 +111,28 @@ const CreateSurveyPage = () => {
                         />
                     </div>
                     <div>
+                        <label className={"block"}>Genre</label>
+                        {genres && genres.length > 0 ? (
+                            <select
+                                value={genre}
+                                onChange={handleGenreSelect}
+                                className={"border p-2 w-full rounded"}
+                                required
+                            >
+                                <option value={""}>Select a Genre</option>
+                                {genres.map((g) => (
+                                    <option key={g.id} value={g.name}>{g.name}</option>
+                                ))}
+
+                            </select>
+                        ) : (<p>Loading Genres</p>)}
+                    </div>
+                    <div>
                         <label className="block">Visibility</label>
                         <select
                             value={visibility}
                             onChange={(e) => setVisibility(e.target.value)}
-                            className="border p-2 w-full"
+                            className="border p-2 w-full bg-gray-900 border-gray-300"
                         >
                             {/*<option value="public">Public</option>*/}
                             <option value="private">Private</option>
@@ -74,7 +141,7 @@ const CreateSurveyPage = () => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     >
                         {isLoading ? "Creating..." : "Create Survey"}
                     </button>

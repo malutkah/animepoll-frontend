@@ -1,23 +1,32 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {useEffect, useState} from "react"
 import Link from "next/link"
 import ProtectedRoute from "../components/ProtectedRoute"
-import { authFetch } from "../../lib/api"
-import { useRouter } from "next/navigation"
+import {authFetch} from "../../lib/api"
+import {useRouter} from "next/navigation"
 
 interface Survey {
     id: string;
     title: string;
     description: string;
     visibility: string;
+    genre_id: string;
 }
+
+interface AnimeGenre {
+    id: string;
+    name: string;
+}
+
+type AnimeGenres = AnimeGenre[];
 
 const DashboardPage = () => {
     const [surveys, setSurveys] = useState<Survey[]>([])
     const [error, setError] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
-    const router = useRouter()
+
+    const [genres, setGenres] = useState<AnimeGenre[] | []>([])
 
     const fetchSurveys = async () => {
         try {
@@ -34,9 +43,39 @@ const DashboardPage = () => {
         }
     }
 
+    const fetchAnimeGenres = async () => {
+        try {
+            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            if (res.status !== 200) {
+                const err = await res.json();
+                setError(err.message || "Failed to load genres");
+                return;
+            }
+            const data = await res.json()
+            setGenres(data);
+
+        } catch (err) {
+            setError("Failed getting genres");
+            console.log(err)
+        } finally {
+        }
+    }
+
     useEffect(() => {
         fetchSurveys()
+        fetchAnimeGenres()
     }, [])
+
+    const getGenreName = (genreId: string) => {
+        if (surveys && surveys.length) {
+            const genre = genres.find((g: AnimeGenre) => g.id === genreId)
+            if (genre) {
+                return genre.name
+            } else {
+                return "No genre";
+            }
+        }
+    }
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this survey?")) return
@@ -60,13 +99,12 @@ const DashboardPage = () => {
     const filteredSurveys = surveys && surveys.filter(survey =>
         survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         survey.description.toLowerCase().includes(searchTerm.toLowerCase())
-
     )
 
     return (
         <ProtectedRoute>
             <div>
-                <h1 className="text-4xl font-bold mb-6 text-gray-800">Dashboard</h1>
+                <h1 className="text-4xl font-bold mb-6 text-white">Dashboard</h1>
                 <div className="mb-4">
                     <input
                         type="text"
@@ -90,7 +128,11 @@ const DashboardPage = () => {
                         <p>No surveys found.</p>
                     ) : (
                         filteredSurveys && filteredSurveys.map((survey) => (
-                            <div key={survey.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 break-all">
+                            <div key={survey.id}
+                                 className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 break-all">
+                                <div className={"flex justify-end"}>
+                                    <p className={"pt-0 text-indigo-400 text-sm"}>{getGenreName(survey.genre_id)}</p>
+                                </div>
                                 <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-wrap">{survey.title}</h2>
                                 <p className="text-gray-600 dark:text-gray-300 mt-2">{survey.description}</p>
                                 <div className="mt-4 flex space-x-2">

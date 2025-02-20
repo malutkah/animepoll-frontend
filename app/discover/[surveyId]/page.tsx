@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useToast } from "@/app/components/ToastProvider";
 import BarChart from "@/app/components/BarChart";
+import {authFetch} from "@/lib/api";
 
 interface Question {
     id: string;
@@ -23,7 +24,15 @@ interface Response {
     submitted_at: string;
 }
 
-const formatTimestamp = (s: string): string => {
+interface AnimeGenre {
+    id: string;
+    name: string;
+}
+
+type AnimeGenres = AnimeGenre[];
+
+
+export const formatTimestamp = (s: string): string => {
     const date = new Date(s);
     const day = date.getUTCDate().toString().padStart(2, "0");
     const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
@@ -42,12 +51,15 @@ const PublicSurveyPage = () => {
     const [responses, setResponses] = useState<{ [key: string]: string }>({});
     const [results, setResults] = useState<{ [key: string]: Response[] }>({});
     const [error, setError] = useState("");
+    const [genres, setGenres] = useState<AnimeGenre[] | []>([])
+
+    const [genre, setGenre] = useState("")
 
     // Fetch survey details
     const fetchSurveyDetails = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/public`);
-            if (!res.ok) {
+            if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load survey details");
                 return;
@@ -59,11 +71,30 @@ const PublicSurveyPage = () => {
         }
     };
 
+    const fetchAnimeGenres = async () => {
+        try {
+            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            if (res.status !== 200) {
+                const err = await res.json();
+                setError(err.message || "Failed to load genres");
+                return;
+            }
+            const data = await res.json()
+            setGenres(data);
+
+        } catch (err) {
+            setError("Failed getting genres");
+            console.log(err)
+        } finally {
+        }
+    }
+
+
     // Fetch survey questions
     const fetchQuestions = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions/public`);
-            if (!res.ok) {
+            if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load questions");
                 return;
@@ -79,12 +110,14 @@ const PublicSurveyPage = () => {
     const fetchResults = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/responses/public`);
-            if (!res.ok) {
+            if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load results");
                 return;
             }
+
             const data = await res.json();
+
             if (Array.isArray(data)) {
                 const groupedResults = data.reduce((acc: { [key: string]: Response[] }, response: Response & { question_id: string }) => {
                     if (!acc[response.question_id]) {
@@ -94,18 +127,29 @@ const PublicSurveyPage = () => {
                     return acc;
                 }, {});
                 setResults(groupedResults);
-            } else {
+            } else if (data) {
                 setResults({ [data.question_id]: [data] });
             }
         } catch (err) {
+            console.error(err)
             setError("Failed to load results");
         }
     };
 
     useEffect(() => {
+        if (survey && genres.length > 0) {
+            const savedGenre = genres.find((g: AnimeGenre) => g.id === survey.genre_id)
+            if (savedGenre) {
+                setGenre(savedGenre.name) // set the select value to the genre id
+            }
+        }
+    }, [survey, genres])
+
+    useEffect(() => {
         fetchSurveyDetails();
         fetchQuestions();
         fetchResults();
+        fetchAnimeGenres()
     }, [params.surveyId]);
 
     const handleResponseChange = (questionId: string, value: string) => {
@@ -146,26 +190,27 @@ const PublicSurveyPage = () => {
             {error && <p className="text-red-500">{error}</p>}
             {survey ? (
                 <div>
-                    <h1 className="text-4xl font-bold text-gray-800">{survey.title}</h1>
-                    <p className="mt-2 text-gray-600">{survey.description}</p>
+                    <h1 className="text-4xl font-bold text-white">{survey.title}</h1>
+                    <p className="mt-2 text-white">{survey.description}</p>
+                    <p className="mt-2 text-white">Genre: {genre ?? "N/A"}</p>
+
                 </div>
             ) : (
                 <p>Loading survey...</p>
             )}
 
-            {/* Answer Form */}
             {questions.length > 0 ? (
                 <form onSubmit={handleSubmitResponses} className="space-y-6 mt-8">
-                    {questions.map((question) => (
+                    {questions.map((question, i) => (
                         <div key={question.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
-                            <p className="font-medium text-gray-800 dark:text-gray-100">{question.survey_text}</p>
+                            <p className="font-medium text-white">{question.survey_text}</p>
                             {question.type === "multiple-choice" ? (
                                 <div className="mt-2 space-y-2">
                                     {question.possible_answers.map((option, idx) => (
                                         <label key={idx} className="flex items-center">
                                             <input
                                                 type="radio"
-                                                name={question.id}
+                                                name={question.id+i}
                                                 value={option}
                                                 checked={responses[question.id] === option}
                                                 onChange={(e) => handleResponseChange(question.id, e.target.value)}
@@ -198,7 +243,7 @@ const PublicSurveyPage = () => {
 
             {/* BarChart Results for Multiple Choice Questions */}
             <div className="mt-8">
-                <h2 className="text-3xl font-bold text-gray-800">Survey Results</h2>
+                <h2 className="text-3xl font-bold text-white">Multiple Choice Results</h2>
                 <div className="mt-4">
                     {questions
                         .filter((q) => q.type === "multiple-choice" && results[q.id])
@@ -216,6 +261,28 @@ const PublicSurveyPage = () => {
                         })}
                 </div>
             </div>
+
+            {/* Text Response Results */}
+            <div className="mt-8">
+                <h2 className="text-3xl font-bold text-white">Text Responses</h2>
+                <div className="mt-4">
+                    {questions
+                        .filter((q) => q.type === "text" && results[q.id])
+                        .map((question) => (
+                            <div key={question.id} className="mb-8">
+                                <h3 className="text-xl font-bold">{question.survey_text} – Responses</h3>
+                                <ul className="list-disc ml-5">
+                                    {results[question.id].map((resp, idx) => (
+                                        <li key={idx} className="text-white">
+                                            {resp.answer_value} <span className="text-sm text-white">({formatTimestamp(resp.submitted_at)})</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                </div>
+            </div>
+            {/*text responses*/}
         </div>
     );
 };
