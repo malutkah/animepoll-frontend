@@ -16,22 +16,22 @@ interface BarChartProps {
     answerValues: AnswerValue[];
 }
 
-// Generate random colors for each dataset
-const generateColors = () => {
-    const r = Math.floor(150 + Math.random() * 106); // random between 150 and 255
-    const g = Math.floor(150 + Math.random() * 106);
-    const b = Math.floor(150 + Math.random() * 106);
-    const bgColor = `rgba(${r}, ${g}, ${b}, 1)`;
-    const borderColor = `rgba(${r}, ${g}, ${b}, 1)`;
-    return { bgColor, borderColor };
-};
+// Preset array of 5 appealing colors
+const colorPresets = [
+    "rgba(54, 162, 235, 0.8)",   // blue
+    "rgba(255, 99, 132, 0.8)",   // red
+    "rgba(255, 206, 86, 0.8)",   // yellow
+    "rgba(75, 192, 192, 0.8)",   // green/teal
+    "rgba(153, 102, 255, 0.8)"   // purple
+];
 
 const BarChart = (props: BarChartProps) => {
-    // The maximum value on the x-axis is the total count of responses for the question.
-    const totalCount = props.answerValues.reduce((acc, curr) => acc + curr.count, 0);
+    // The max value on the x-axis is the total count of responses for the question.
+    const totalCount = props.answerValues.reduce((acc, curr) => curr.count > acc ? curr.count : acc, 0);
 
-    const barDataset = props.answerValues.map((value) => {
-        const { bgColor, borderColor } = generateColors();
+    const barDataset = props.answerValues.map((value, index) => {
+        const bgColor = colorPresets[index % colorPresets.length];
+        const borderColor = bgColor;
         return {
             label: value.text,
             data: [value.count],
@@ -52,12 +52,29 @@ const BarChart = (props: BarChartProps) => {
             x: {
                 beginAtZero: true,
                 max: totalCount,
+                ticks: {
+                    stepSize: 1,
+                    color: '#FFF', // Font color for the x-axis tick labels
+                    font: {
+                        size: 15, // Font size for the x-axis tick labels
+                    },
+                },
             },
+            y: {
+                ticks: {
+                    color: '#fff',
+                    font: {
+                        size: 17
+                    }
+                }
+            }
         },
+        responsive: true,
+        maintainAspectRatio: false,
     };
 
     return (
-        <div>
+        <div className="w-full h-64 md:h-80">
             <Bar data={data} options={options} />
         </div>
     );
