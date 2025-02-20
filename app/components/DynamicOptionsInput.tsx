@@ -5,9 +5,10 @@ import { useState } from "react"
 interface DynamicOptionsInputProps {
     options: string[]
     onChange: (options: string[]) => void
+    maxOptions?: number
 }
 
-const DynamicOptionsInput = ({ options, onChange }: DynamicOptionsInputProps) => {
+const DynamicOptionsInput = ({ options, onChange, maxOptions }: DynamicOptionsInputProps) => {
     const handleOptionChange = (index: number, value: string) => {
         const newOptions = [...options]
         newOptions[index] = value
@@ -15,6 +16,7 @@ const DynamicOptionsInput = ({ options, onChange }: DynamicOptionsInputProps) =>
     }
 
     const handleAddOption = () => {
+        if (maxOptions && options.length >= maxOptions) return
         onChange([...options, ""])
     }
 
@@ -40,9 +42,17 @@ const DynamicOptionsInput = ({ options, onChange }: DynamicOptionsInputProps) =>
                     </button>
                 </div>
             ))}
-            <button type="button" onClick={handleAddOption} className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+            <button
+                type="button"
+                onClick={handleAddOption}
+                className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded ${maxOptions && options.length >= maxOptions ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={maxOptions ? options.length >= maxOptions : false}
+            >
                 Add Option
             </button>
+            {maxOptions && options.length >= maxOptions && (
+                <p className="text-sm text-gray-500">Maximum of {maxOptions} options reached.</p>
+            )}
             {/*
         Additional ideas for question types:
         - Rating Scale (e.g., 1-5 stars)
