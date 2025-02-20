@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { FormEvent, useState } from "react"
-import { useRouter } from "next/navigation"
+import {FormEvent, useState} from "react"
+import {useRouter} from "next/navigation"
+import {Check, X, Eye} from "lucide-react";
 
 const SignupForm = () => {
     const [email, setEmail] = useState('')
@@ -19,9 +20,36 @@ const SignupForm = () => {
     const [errorPassword, setErrorPassword] = useState('')
     const [errorPassword2, setErrorPassword2] = useState('')
 
+    const passwordMatchColorYes = 'text-green-400'
+    const passwordMatchColorNo = 'text-red-400'
+
+    const [passwordCheckLength, setPasswordCheckLength] = useState(false)
+    const [passwordCheckChars, setPasswordCheckChars] = useState(false)
+    const [passwordCheckSpace, setPasswordCheckSpace] = useState(true)
+    const [passwordCheckDigits, setPasswordCheckDigits] = useState(false)
+
+    const [showPassword, setShowPassword] = useState(false)
+    const [showPassword2, setShowPassword2] = useState(false)
+
     const [isLoading, setIsLoading] = useState(false)
 
     const router = useRouter()
+
+    const isPasswordValid =
+        passwordCheckLength &&
+        passwordCheckChars &&
+        passwordCheckSpace &&
+        passwordCheckDigits
+
+    const validatePassword = (pwd: string) => {
+        setPasswordCheckLength(pwd.length >= 8)
+
+        const hasUppercase = /[A-Z]/.test(pwd)
+        const hasAllowed = /[a-z!?,.#&$'"@;*_]/.test(pwd)
+        setPasswordCheckChars(hasUppercase && hasAllowed)
+        setPasswordCheckSpace(!/\s/.test(pwd))
+        setPasswordCheckDigits(/\d/.test(pwd))
+    }
 
     const signupFormSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -74,8 +102,8 @@ const SignupForm = () => {
         try {
             const res = await fetch("http://localhost:8080/auth/register", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, username, password }),
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, username, password}),
             })
 
             const data = await res.json()
@@ -94,6 +122,11 @@ const SignupForm = () => {
         }
     }
 
+    const handleMouseDown = () => setShowPassword(true)
+    const handleMouseUp = () => setShowPassword(false)
+    const handleMouseDown2 = () => setShowPassword2(true)
+    const handleMouseUp2 = () => setShowPassword2(false)
+
     return (
         <div className="max-w-md mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">Sign Up</h2>
@@ -108,7 +141,7 @@ const SignupForm = () => {
                         name="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     {errorUsername && <p className="mt-2 text-red-400 text-sm">{errorUsername}</p>}
                 </div>
@@ -122,7 +155,7 @@ const SignupForm = () => {
                         name="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
                     {errorEmail && <p className="mt-2 text-red-400 text-sm">{errorEmail}</p>}
                 </div>
@@ -130,34 +163,79 @@ const SignupForm = () => {
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Password
                     </label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="password"
+                            name="password"
+                            value={password}
+                            onChange={(e) => {
+                                const newPwd = e.target.value
+                                setPassword(newPwd)
+                                validatePassword(newPwd)
+                            }}
+                            className="mt-1 block w-full pr-10 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <button
+                            type="button"
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        >
+                            <Eye className="h-5 w-5"/>
+                        </button>
+                    </div>
                     {errorPassword && <p className="mt-2 text-red-400 text-sm">{errorPassword}</p>}
                 </div>
                 <div>
                     <label htmlFor="password2" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Confirm Password
                     </label>
-                    <input
-                        type="password"
-                        id="password2"
-                        name="password2"
-                        value={password2}
-                        onChange={(e) => setPassword2(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword2 ? "text" : "password"}
+                            id="password2"
+                            name="password2"
+                            value={password2}
+                            onChange={(e) => setPassword2(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <button
+                            type="button"
+                            onMouseDown={handleMouseDown2}
+                            onMouseUp={handleMouseUp2}
+                            onMouseLeave={handleMouseUp2}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        >
+                            <Eye className="h-5 w-5"/>
+                        </button>
+                    </div>
                     {errorPassword2 && <p className="mt-2 text-red-400 text-sm">{errorPassword2}</p>}
+
+
+                    <p className={`mt-3 text-left ${passwordCheckLength ? passwordMatchColorYes : passwordMatchColorNo} text-sm flex items-center gap-1`}>
+                        {passwordCheckLength ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
+                        <span>Password contains at least 8 characters</span>
+                    </p>
+                    <p className={`mt-1 text-left ${passwordCheckChars ? passwordMatchColorYes : passwordMatchColorNo} text-sm flex items-center gap-1`}>
+                        {passwordCheckChars ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
+                        <span>Password contains letters (A-Z, a-z) and allowed characters (!?,.#&$'"@;*#_)</span>
+                    </p>
+                    <p className={`mt-1 text-left ${passwordCheckSpace ? passwordMatchColorYes : passwordMatchColorNo} text-sm flex items-center gap-1`}>
+                        {passwordCheckSpace ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
+                        <span>Password does not contain spaces</span>
+                    </p>
+                    <p className={`mt-1 text-left ${passwordCheckDigits ? passwordMatchColorYes : passwordMatchColorNo} text-sm flex items-center gap-1`}>
+                        {passwordCheckDigits ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
+                        <span>Password contains at least one digit (0-9)</span>
+                    </p>
+
                 </div>
                 {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
                 <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !isPasswordValid}
                     className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50"
                 >
                     {isLoading ? "Signing Up..." : "Sign Up"}
