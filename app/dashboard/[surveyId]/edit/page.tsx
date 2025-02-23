@@ -1,202 +1,222 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import ProtectedRoute from "../../../components/ProtectedRoute"
-import { authFetch } from "@/lib/api"
-import { useToast } from "@/app/components/ToastProvider"
-import DynamicOptionsInput from "@/app/components/DynamicOptionsInput"
-import QuestionModal from "@/app/components/QuestionModal"
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import ProtectedRoute from "../../../components/ProtectedRoute";
+import { authFetch } from "@/lib/api";
+import { useToast } from "@/app/components/ToastProvider";
+import DynamicOptionsInput from "@/app/components/DynamicOptionsInput";
+import QuestionModal from "@/app/components/QuestionModal";
 
 interface Survey {
-    id: string
-    title: string
-    description: string
-    visibility: string
-    genre_id: string
+    id: string;
+    title: string;
+    description: string;
+    visibility: string;
+    genre_id: string;
 }
 
 interface Question {
-    id: string
-    survey_text: string
-    type: string
-    possible_answers: string[]
+    id: string;
+    survey_text: string;
+    type: string;
+    possible_answers: string[];
 }
 
 interface AnimeGenre {
-    id: string
-    name: string
+    id: string;
+    name: string;
 }
 
-type AnimeGenres = AnimeGenre[]
+type AnimeGenres = AnimeGenre[];
 
 const EditSurveyPage = () => {
-    const params = useParams() as { surveyId: string }
-    const router = useRouter()
-    const { addToast } = useToast()
+    const params = useParams() as { surveyId: string };
+    const router = useRouter();
+    const { addToast } = useToast();
 
-    const [survey, setSurvey] = useState<Survey | null>(null)
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [visibility, setVisibility] = useState("public")
-    const [updateError, setUpdateError] = useState("")
-    const [updateLoading, setUpdateLoading] = useState(false)
+    const [survey, setSurvey] = useState<Survey | null>(null);
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [visibility, setVisibility] = useState("public");
+    const [updateError, setUpdateError] = useState("");
+    const [updateLoading, setUpdateLoading] = useState(false);
 
     // Question creation states
-    const [questionText, setQuestionText] = useState("")
-    const [questionType, setQuestionType] = useState("multiple-choice")
-    const [options, setOptions] = useState<string[]>([""])
-    const [questionError, setQuestionError] = useState("")
-    const [questionLoading, setQuestionLoading] = useState(false)
+    const [questionText, setQuestionText] = useState("");
+    const [questionType, setQuestionType] = useState("multiple-choice");
+    const [options, setOptions] = useState<string[]>([""]);
+    const [questionError, setQuestionError] = useState("");
+    const [questionLoading, setQuestionLoading] = useState(false);
+
+    // New rating settings for question creation
+    const [ratingRange, setRatingRange] = useState(5);
+    const [ratingDisplayType, setRatingDisplayType] = useState("star");
+    const [ratingAllowHalfSteps, setRatingAllowHalfSteps] = useState(false);
+    const [ratingMinText, setRatingMinText] = useState("Very bad");
+    const [ratingMaxText, setRatingMaxText] = useState("Perfect");
 
     // Existing questions list
-    const [questions, setQuestions] = useState<Question[]>([])
-    const [activeContextMenu, setActiveContextMenu] = useState<string | null>(null)
-    const [editingQuestion, setEditingQuestion] = useState<Question | null>(null)
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [activeContextMenu, setActiveContextMenu] = useState<string | null>(null);
+    const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
-    const [disableQuestion, setDisableQuestion] = useState(true)
-    const [disableSurvey, setDisableSurvey] = useState(false)
+    const [disableQuestion, setDisableQuestion] = useState(true);
+    const [disableSurvey, setDisableSurvey] = useState(false);
 
     // Genre states
-    const [genres, setGenres] = useState<AnimeGenres>([])
-    const [genreId, setGenreId] = useState("")
-    const [genre, setGenre] = useState("")
+    const [genres, setGenres] = useState<AnimeGenres>([]);
+    const [genreId, setGenreId] = useState("");
+    const [genre, setGenre] = useState("");
 
-    const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none"
+    const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none";
 
     const fetchAnimeGenres = async () => {
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            const res = await authFetch("http://localhost:8080/poll/survey/genres");
             if (res.status !== 200) {
-                const err = await res.json()
-                setUpdateError(err.message || "Failed to load genres")
-                return
+                const err = await res.json();
+                setUpdateError(err.message || "Failed to load genres");
+                return;
             }
-            const data = await res.json()
-            setGenres(data)
+            const data = await res.json();
+            setGenres(data);
         } catch (err) {
-            setUpdateError("Failed getting genres")
-            console.error(err)
+            setUpdateError("Failed getting genres");
+            console.error(err);
         }
-    }
+    };
 
     const handleGenreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = e.target.value
-
-        const selectedGenre = genres.find((g) => g.name === selected)
+        const selected = e.target.value;
+        const selectedGenre = genres.find((g) => g.name === selected);
         if (selectedGenre) {
-            setGenre(selectedGenre.name)
-            setGenreId(selectedGenre.id)
+            setGenre(selectedGenre.name);
+            setGenreId(selectedGenre.id);
         } else {
-            setGenre("")
-            setGenreId("")
+            setGenre("");
+            setGenreId("");
         }
-    }
+    };
 
     const checkVisibility = (value: string) => {
         if (value === "public" && (!questions || questions.length === 0)) {
-            setDisableSurvey(true)
+            setDisableSurvey(true);
         } else {
-            setDisableSurvey(false)
+            setDisableSurvey(false);
         }
-        setVisibility(value)
-    }
+        setVisibility(value);
+    };
 
     const fetchSurvey = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`)
+            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`);
             if (!res.ok) {
-                const err = await res.json()
-                setUpdateError(err.message || "Failed to load survey")
-                return
+                const err = await res.json();
+                setUpdateError(err.message || "Failed to load survey");
+                return;
             }
-            const data = await res.json()
-            setSurvey(data)
-            setTitle(data.title)
-            setDescription(data.description)
-            setVisibility(data.visibility)
-            // Save the genre_id from the survey
-            setGenreId(data.genre_id)
+            const data = await res.json();
+            setSurvey(data);
+            setTitle(data.title);
+            setDescription(data.description);
+            setVisibility(data.visibility);
+            setGenreId(data.genre_id);
         } catch (err) {
-            setUpdateError("Failed to load survey")
+            setUpdateError("Failed to load survey");
         }
-    }
+    };
 
     const fetchQuestions = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`)
+            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`);
             if (!res.ok) {
-                const err = await res.json()
-                return
+                const err = await res.json();
+                return;
             }
-            const data = await res.json()
-            setQuestions(data)
+            const data = await res.json();
+            setQuestions(data);
         } catch (err) {
             // Handle error silently
         }
-    }
+    };
 
     // When both survey and genres are loaded, update the genre select with the saved genre.
     useEffect(() => {
         if (survey && genres.length > 0) {
-            const savedGenre = genres.find((g: AnimeGenre) => g.id === survey.genre_id)
+            const savedGenre = genres.find((g: AnimeGenre) => g.id === survey.genre_id);
             if (savedGenre) {
-                setGenre(savedGenre.name) // set the select value to the genre id
+                setGenre(savedGenre.name);
             }
         }
-    }, [survey, genres])
+    }, [survey, genres]);
 
     useEffect(() => {
-        fetchSurvey()
-        fetchQuestions()
-        fetchAnimeGenres()
-    }, [params.surveyId])
+        fetchSurvey();
+        fetchQuestions();
+        fetchAnimeGenres();
+    }, [params.surveyId]);
 
     // Handle survey update
     const handleSurveyUpdate = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setUpdateLoading(true)
-        setUpdateError("")
+        e.preventDefault();
+        setUpdateLoading(true);
+        setUpdateError("");
         try {
             const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title, description, visibility, genre_id: genreId }),
-            })
+            });
             if (!res.ok) {
-                const err = await res.json()
-                setUpdateError(err.message || "Failed to update survey")
-                addToast(err.message || "Failed to update survey", "error")
-                return
+                const err = await res.json();
+                setUpdateError(err.message || "Failed to update survey");
+                addToast(err.message || "Failed to update survey", "error");
+                return;
             }
-            addToast("Survey updated successfully", "success")
+            addToast("Survey updated successfully", "success");
         } catch (err) {
-            setUpdateError("Failed to update survey")
-            addToast("Failed to update survey", "error")
+            setUpdateError("Failed to update survey");
+            addToast("Failed to update survey", "error");
         } finally {
-            setUpdateLoading(false)
+            setUpdateLoading(false);
         }
-    }
+    };
 
-    // Handle question creation with safety feature and limit options to 5
+    // Handle question creation
     const handleQuestionCreate = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setQuestionLoading(true)
-        setQuestionError("")
+        e.preventDefault();
+        setQuestionLoading(true);
+        setQuestionError("");
 
         if (!questionText.trim()) {
-            setQuestionError("Question text must be filled.")
-            setQuestionLoading(false)
-            return
+            setQuestionError("Question text must be filled.");
+            setQuestionLoading(false);
+            return;
         }
 
+        let possibleAnswersArray: string[] = [];
         if (questionType === "multiple-choice") {
-            const answersArray = options.filter(opt => opt.trim() !== "")
-            if (answersArray.length === 0) {
-                setQuestionError("Please provide at least one option for multiple-choice questions.")
-                setQuestionLoading(false)
-                return
+            possibleAnswersArray = options.filter(opt => opt.trim() !== "");
+            if (possibleAnswersArray.length === 0) {
+                setQuestionError("Please provide at least one option for multiple-choice questions.");
+                setQuestionLoading(false);
+                return;
             }
+        } else if (questionType === "rating") {
+            // Validate rating settings
+            if (!ratingMinText.trim() || !ratingMaxText.trim()) {
+                setQuestionError("Please provide labels for both the minimum and maximum rating.");
+                setQuestionLoading(false);
+                return;
+            }
+            possibleAnswersArray = [JSON.stringify({
+                range: ratingRange,
+                displayType: ratingDisplayType,
+                allowHalfSteps: (ratingDisplayType === "star" || ratingDisplayType === "slider") ? ratingAllowHalfSteps : false,
+                minText: ratingMinText,
+                maxText: ratingMaxText,
+            })];
         }
 
         try {
@@ -206,53 +226,59 @@ const EditSurveyPage = () => {
                 body: JSON.stringify({
                     survey_text: questionText,
                     type: questionType,
-                    possible_answers: questionType === "multiple-choice" ? options.filter(opt => opt.trim() !== "") : [],
+                    possible_answers: questionType === "multiple-choice" ? possibleAnswersArray : (questionType === "rating" ? possibleAnswersArray : []),
                 }),
-            })
+            });
             if (!res.ok) {
-                const err = await res.json()
-                setQuestionError(err.message || "Failed to create question")
-                addToast(err.message || "Failed to create question", "error")
-                return
+                const err = await res.json();
+                setQuestionError(err.message || "Failed to create question");
+                addToast(err.message || "Failed to create question", "error");
+                return;
             }
-            addToast("Question created successfully", "success")
-            setQuestionText("")
-            setQuestionType("multiple-choice")
-            setOptions([""])
-            fetchQuestions()
+            addToast("Question created successfully", "success");
+            setQuestionText("");
+            setQuestionType("multiple-choice");
+            setOptions([""]);
+            // Reset rating settings to defaults
+            setRatingRange(5);
+            setRatingDisplayType("star");
+            setRatingAllowHalfSteps(false);
+            setRatingMinText("Very bad");
+            setRatingMaxText("Perfect");
+            fetchQuestions();
         } catch (err) {
-            setQuestionError("Failed to create question")
-            addToast("Failed to create question", "error")
+            setQuestionError("Failed to create question");
+            addToast("Failed to create question", "error");
         } finally {
-            setQuestionLoading(false)
+            setQuestionLoading(false);
         }
-    }
+    };
 
     // Handle deletion of a question
     const handleDeleteQuestion = async (questionId: string) => {
-        if (!confirm("Are you sure you want to delete this question?")) return
+        if (!confirm("Are you sure you want to delete this question?")) return;
         try {
             const res = await authFetch(`http://localhost:8080/poll/question/${questionId}`, {
-                method: "DELETE"
-            })
+                method: "DELETE",
+            });
             if (!res.ok) {
-                const err = await res.json()
-                addToast(err.message || "Failed to delete question", "error")
+                const err = await res.json();
+                addToast(err.message || "Failed to delete question", "error");
             } else {
-                addToast("Question deleted successfully", "success")
-                fetchQuestions()
+                addToast("Question deleted successfully", "success");
+                fetchQuestions();
             }
         } catch (err) {
-            addToast("Failed to delete question", "error")
+            addToast("Failed to delete question", "error");
         } finally {
-            setActiveContextMenu(null)
+            setActiveContextMenu(null);
         }
-    }
+    };
 
     const openEditModal = (question: Question) => {
-        setEditingQuestion(question)
-        setActiveContextMenu(null)
-    }
+        setEditingQuestion(question);
+        setActiveContextMenu(null);
+    };
 
     return (
         <ProtectedRoute>
@@ -296,7 +322,9 @@ const EditSurveyPage = () => {
                                     >
                                         <option value={""}>Select a Genre</option>
                                         {genres.map((g) => (
-                                            <option key={g.id} value={g.name}>{g.name}</option>
+                                            <option key={g.id} value={g.name}>
+                                                {g.name}
+                                            </option>
                                         ))}
                                     </select>
                                 ) : (
@@ -338,8 +366,8 @@ const EditSurveyPage = () => {
                                 type="text"
                                 value={questionText}
                                 onChange={(e) => {
-                                    setDisableQuestion(e.target.value === "")
-                                    setQuestionText(e.target.value)
+                                    setDisableQuestion(e.target.value === "");
+                                    setQuestionText(e.target.value);
                                 }}
                                 className="border p-2 w-full rounded"
                                 required
@@ -354,13 +382,66 @@ const EditSurveyPage = () => {
                             >
                                 <option value="multiple-choice">Multiple Choice</option>
                                 <option value="text">Text</option>
+                                <option value="rating">Rating</option>
                             </select>
                         </div>
-                        {questionType === "multiple-choice" ? (
+                        {questionType === "multiple-choice" && (
                             <DynamicOptionsInput options={options} onChange={setOptions} maxOptions={5} />
-                        ) : (
-                            <div>
-                                <label className="block font-medium">Possible Answers (for text questions, leave blank)</label>
+                        )}
+                        {questionType === "rating" && (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block font-medium">Rating Range</label>
+                                    <select
+                                        value={ratingRange}
+                                        onChange={(e) => setRatingRange(Number(e.target.value))}
+                                        className="border p-2 w-full rounded"
+                                    >
+                                        <option value={5}>1 - 5</option>
+                                        <option value={10}>1 - 10</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block font-medium">Display Type</label>
+                                    <select
+                                        value={ratingDisplayType}
+                                        onChange={(e) => setRatingDisplayType(e.target.value)}
+                                        className="border p-2 w-full rounded"
+                                    >
+                                        <option value="star">Star Rating</option>
+                                        <option value="slider">Slider</option>
+                                        <option value="radio">Radio Buttons</option>
+                                    </select>
+                                </div>
+                                {(ratingDisplayType === "star" || ratingDisplayType === "slider") && (
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={ratingAllowHalfSteps}
+                                            onChange={(e) => setRatingAllowHalfSteps(e.target.checked)}
+                                            className="form-checkbox h-5 w-5 text-indigo-600"
+                                        />
+                                        <span className="text-sm">Allow Half Steps</span>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block font-medium">Minimum Label</label>
+                                    <input
+                                        type="text"
+                                        value={ratingMinText}
+                                        onChange={(e) => setRatingMinText(e.target.value)}
+                                        className="border p-2 w-full rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block font-medium">Maximum Label</label>
+                                    <input
+                                        type="text"
+                                        value={ratingMaxText}
+                                        onChange={(e) => setRatingMaxText(e.target.value)}
+                                        className="border p-2 w-full rounded"
+                                    />
+                                </div>
                             </div>
                         )}
                         <button
@@ -383,10 +464,17 @@ const EditSurveyPage = () => {
                             {questions.map((question) => (
                                 <li key={question.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow relative">
                                     <p className="font-medium text-gray-800 dark:text-gray-100">{question.survey_text}</p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">Type: {question.type}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                                        Type: {question.type === "multiple-choice" ? "Multiple Choice" : question.type === "rating" ? "Rating" : "Text"}
+                                    </p>
                                     {question.type === "multiple-choice" && (
                                         <p className="text-sm text-gray-600 dark:text-gray-300">
                                             Options: {question.possible_answers.join(", ")}
+                                        </p>
+                                    )}
+                                    {question.type === "rating" && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                                            Rating Settings: {JSON.parse(question.possible_answers)}
                                         </p>
                                     )}
                                     {/* "..." Button for Context Menu */}
@@ -418,8 +506,6 @@ const EditSurveyPage = () => {
                     )}
                 </div>
             </div>
-
-            {/* Edit Question Modal */}
             {editingQuestion && (
                 <QuestionModal
                     surveyId={params.surveyId}
@@ -433,7 +519,7 @@ const EditSurveyPage = () => {
                 />
             )}
         </ProtectedRoute>
-    )
-}
+    );
+};
 
 export default EditSurveyPage;
