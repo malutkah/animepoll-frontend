@@ -37,21 +37,21 @@ const Navbar = () => {
                     <>
                         <Link
                             href="/discover"
-                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-500"
                         >
                             <Search className="h-5 w-5" />
                             <span>Discover Polls</span>
                         </Link>
                         <Link
                             href="/dashboard"
-                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-sky-500"
                         >
                             <Home className="h-5 w-5" />
                             <span>Dashboard</span>
                         </Link>
                         <Link
                             href="/profile"
-                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                            className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-emerald-400"
                         >
                             <User className="h-5 w-5" />
                             <span>Profile</span>
