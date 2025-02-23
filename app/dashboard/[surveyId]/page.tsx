@@ -19,6 +19,7 @@ interface Survey {
     title: string;
     description: string;
     visibility: string;
+    update_timestamp: string;
 }
 
 interface Response {
