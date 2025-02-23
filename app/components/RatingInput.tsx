@@ -27,24 +27,20 @@ const RatingInput: React.FC<RatingInputProps> = ({
     if (displayType === "star") {
         const stars = [];
         const step = allowHalfSteps ? 0.5 : 1;
-        // We generate values from step to range (inclusive) in increments of step.
         for (let i = step; i <= range; i += step) {
             let icon;
             if (value >= i) {
-                // full star
                 icon = <Star key={i} className="h-6 w-6 text-yellow-400" />;
             } else if (allowHalfSteps && value >= i - step && value < i) {
-                // simulate half star by showing same star with reduced opacity
                 icon = <Star key={i} className="h-6 w-6 text-yellow-400 opacity-50" />;
             } else {
-                // empty star (gray)
                 icon = <Star key={i} className="h-6 w-6 text-gray-300" />;
             }
             stars.push(
                 <span
                     key={i}
                     onClick={() => interactive && onChange(i)}
-                    className={interactive ? "cursor-pointer" : ""}
+                    className={interactive ? "cursor-pointer transition-transform duration-200 hover:scale-110" : ""}
                 >
           {icon}
         </span>
@@ -68,7 +64,7 @@ const RatingInput: React.FC<RatingInputProps> = ({
                     step={allowHalfSteps ? 0.5 : 1}
                     value={value}
                     onChange={(e) => interactive && onChange(parseFloat(e.target.value))}
-                    className="mx-2"
+                    className="mx-2 w-full h-2 bg-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
                     disabled={!interactive}
                 />
                 <span className="ml-2 text-sm">{maxText}</span>
@@ -81,8 +77,7 @@ const RatingInput: React.FC<RatingInputProps> = ({
             options.push(i);
         }
         return (
-
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
                 <span className="mr-2 text-sm">{minText}</span>
                 {options.map((opt) => (
                     <label key={opt} className="flex items-center">
@@ -93,7 +88,7 @@ const RatingInput: React.FC<RatingInputProps> = ({
                             checked={value === opt}
                             onChange={() => interactive && onChange(opt)}
                             disabled={!interactive}
-                            className="mr-1"
+                            className="appearance-none w-5 h-5 border border-gray-300 rounded-full checked:bg-indigo-600 checked:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 mr-1"
                         />
                         <span className="text-sm">{opt}</span>
                     </label>

@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useToast } from "@/app/components/ToastProvider";
 import BarChart from "@/app/components/BarChart";
-import { authFetch } from "@/lib/api";
-import RichTextEdit from "@/app/components/RichTextEdit";
 import RatingInput, { RatingInputProps } from "@/app/components/RatingInput";
+import RatingDistributionChart from "@/app/components/RatingDistributionChart";
+import { authFetch } from "@/lib/api";
 
 interface Question {
     id: string;
@@ -19,19 +19,26 @@ interface Survey {
     id: string;
     title: string;
     description: string;
+    genre_id?: string;
 }
 
-interface Response {
-    answer_value: string;
-    submitted_at: string;
+interface AggregatedQuestionResult {
+    question_id: string;
+    question_text: string;
+    type: string;
+    response_count: number;
+    options?: { option_text: string; count: number; percentage: number }[];
+    average_rating?: number;
+    distribution?: { [key: string]: number };
 }
 
-interface AnimeGenre {
-    id: string;
-    name: string;
+interface AggregatedSurveyResult {
+    survey_id: string;
+    title: string;
+    description: string;
+    total_responses: number;
+    questions: AggregatedQuestionResult[];
 }
-
-type AnimeGenres = AnimeGenre[];
 
 export const formatTimestamp = (s: string): string => {
     const date = new Date(s);
@@ -43,25 +50,29 @@ export const formatTimestamp = (s: string): string => {
     return `${day}.${month}.${year}  ${hours}:${minutes}`;
 };
 
-// Collapsible component for text responses
-const TextResponsePanel = ({ question, responses }: { question: Question; responses: Response[]; }) => {
+const TextResponsePanel = ({
+                               question,
+                               responses,
+                           }: {
+    question: Question;
+    responses: string[];
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
     const sortedResponses = [...responses].sort((a, b) => {
-        const dateA = new Date(a.submitted_at).getTime();
-        const dateB = new Date(b.submitted_at).getTime();
-        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+        // Simple sort (could be replaced with timestamp-based sort)
+        return sortOrder === "newest" ? -1 : 1;
     });
 
     return (
-        <div className="mb-8 border border-gray-300 rounded-lg overflow-hidden shadow-md">
+        <div className="mb-6 border border-gray-300 rounded-lg overflow-hidden shadow-md">
             <button
                 type="button"
                 className="w-full flex justify-between items-center bg-gray-800 text-white px-4 py-2 focus:outline-none"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className="font-bold">Question: {question.survey_text}</span>
+                <span className="font-bold text-lg">Question: {question.survey_text}</span>
                 <span className="text-sm">{isOpen ? "Hide Responses" : "Show Responses"}</span>
             </button>
             {isOpen && (
@@ -80,8 +91,7 @@ const TextResponsePanel = ({ question, responses }: { question: Question; respon
                     <ul className="divide-y divide-gray-700">
                         {sortedResponses.map((resp, idx) => (
                             <li key={idx} className="py-2 transition-opacity duration-300 hover:bg-gray-600">
-                                <div>{resp.answer_value}</div>
-                                <div className="text-xs text-gray-400">{formatTimestamp(resp.submitted_at)}</div>
+                                <div className="text-base">{resp}</div>
                             </li>
                         ))}
                     </ul>
@@ -98,13 +108,20 @@ const PublicSurveyPage = () => {
     const [survey, setSurvey] = useState<Survey | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [responses, setResponses] = useState<{ [key: string]: string }>({});
-    const [results, setResults] = useState<{ [key: string]: Response[] }>({});
+    const [aggregatedResults, setAggregatedResults] = useState<{
+        [key: string]: AggregatedQuestionResult;
+    }>({});
     const [error, setError] = useState("");
-    const [genres, setGenres] = useState<AnimeGenre[]>([]);
-
+    const [genres, setGenres] = useState<{ id: string; name: string }[]>([]);
     const [genre, setGenre] = useState("");
 
-    // Fetch survey details
+    // Toggle state: "questions" or "results"
+    const [viewMode, setViewMode] = useState<"questions" | "results">("questions");
+
+    // For result pagination
+    const [currentResultIndex, setCurrentResultIndex] = useState(0);
+
+    // Fetch survey details (for header info)
     const fetchSurveyDetails = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/public`);
@@ -114,12 +131,18 @@ const PublicSurveyPage = () => {
                 return;
             }
             const data = await res.json();
-            setSurvey(data);
+            setSurvey({
+                id: data.survey_id,
+                title: data.title,
+                description: data.description,
+                genre_id: data.genre_id,
+            });
         } catch (err) {
             setError("Failed to load survey details");
         }
     };
 
+    // Fetch genres
     const fetchAnimeGenres = async () => {
         try {
             const res = await fetch("http://localhost:8080/poll/survey/genres");
@@ -136,6 +159,7 @@ const PublicSurveyPage = () => {
         }
     };
 
+    // Fetch detailed questions for response submission
     const fetchQuestions = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions/public`);
@@ -151,26 +175,29 @@ const PublicSurveyPage = () => {
         }
     };
 
+    // Fetch aggregated results from the new endpoint
     const fetchResults = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/responses/public`);
+            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/results/public`);
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load results");
                 return;
             }
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                const groupedResults = data.reduce((acc: { [key: string]: Response[] }, response: Response & { question_id: string }) => {
-                    if (!acc[response.question_id]) {
-                        acc[response.question_id] = [];
-                    }
-                    acc[response.question_id].push(response);
+            const data: AggregatedSurveyResult = await res.json();
+            if (data && data.questions) {
+                const aggr = data.questions.reduce((acc: { [key: string]: AggregatedQuestionResult }, q) => {
+                    acc[q.question_id] = q;
                     return acc;
                 }, {});
-                setResults(groupedResults);
-            } else if (data) {
-                setResults({ [data.question_id]: [data] });
+                setAggregatedResults(aggr);
+                if (!survey) {
+                    setSurvey({
+                        id: data.survey_id,
+                        title: data.title,
+                        description: data.description,
+                    });
+                }
             }
         } catch (err) {
             console.error(err);
@@ -179,20 +206,21 @@ const PublicSurveyPage = () => {
     };
 
     useEffect(() => {
-        if (survey && genres.length > 0) {
-            const savedGenre = genres.find((g: AnimeGenre) => g.id === (survey as any).genre_id);
-            if (savedGenre) {
-                setGenre(savedGenre.name);
-            }
-        }
-    }, [survey, genres]);
-
-    useEffect(() => {
         fetchSurveyDetails();
         fetchQuestions();
         fetchResults();
         fetchAnimeGenres();
     }, [params.surveyId]);
+
+    // Set genre name once survey and genres load
+    useEffect(() => {
+        if (survey && genres.length > 0 && survey.genre_id) {
+            const savedGenre = genres.find((g) => g.id === survey.genre_id);
+            if (savedGenre) {
+                setGenre(savedGenre.name);
+            }
+        }
+    }, [survey, genres]);
 
     const handleResponseChange = (questionId: string, value: string) => {
         setResponses((prev) => ({ ...prev, [questionId]: value }));
@@ -227,139 +255,225 @@ const PublicSurveyPage = () => {
         }
     };
 
+    // Prepare aggregated results as an array for pagination
+    const aggregatedResultsArray = Object.values(aggregatedResults);
+    const totalResults = aggregatedResultsArray.length;
+
     return (
         <div className="space-y-8">
             {error && <p className="text-red-500">{error}</p>}
+            {/* Survey Header */}
             {survey ? (
-                <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
-                    <h1 className="text-4xl font-bold text-white mb-2">Survey: {survey.title}</h1>
-                    <p className="mt-2 text-white">{survey.description}</p>
-                    <p className="mt-2 text-white">Genre: {genre ? genre : "N/A"}</p>
+                <div className="bg-gradient-to-r from-purple-600 to-blue-500 py-8 px-6 rounded-lg shadow-lg animate-fadeIn mb-8">
+                    <h1 className="text-4xl font-extrabold text-white mb-3 flex items-center gap-2">
+                        {survey.title} <span className="text-2xl animate-pulse">🎌🔥</span>
+                    </h1>
+                    <p className="text-white text-lg mb-2">{survey.description}</p>
+                    {genre && <p className="text-white text-base">Genre: {genre}</p>}
                 </div>
             ) : (
-                <p>Loading survey...</p>
+                <p>Loading survey details...</p>
             )}
 
-            {questions.length > 0 ? (
-                <form onSubmit={handleSubmitResponses} className="space-y-6 mt-8">
-                    <h2 className="text-2xl font-bold text-white">Please answer the following questions:</h2>
-                    {questions.map((question, i) => (
-                        <div key={question.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
-                            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Question:</h3>
-                            <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">{question.survey_text}</p>
-                            {question.type === "multiple-choice" ? (
-                                <>
-                                    <h4 className="text-md font-semibold text-gray-600 dark:text-gray-400">Select an Answer:</h4>
-                                    <div className="mt-1 space-y-2">
-                                        {question.possible_answers.map((option, idx) => (
-                                            <label key={idx} className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name={`${question.id}-${i}`}
-                                                    value={option}
-                                                    checked={responses[question.id] === option}
-                                                    onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                                                    className="mr-2"
-                                                />
-                                                <span className="text-gray-700 dark:text-gray-300">{option}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : question.type === "rating" ? (
-                                // Render interactive RatingInput for rating questions.
-                                (() => {
+            {/* Toggle Button Group */}
+            <div className="flex justify-center gap-6">
+                <button
+                    onClick={() => setViewMode("questions")}
+                    className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                        viewMode === "questions" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                    }`}
+                >
+                    Answer Survey
+                </button>
+                <button
+                    onClick={() => {
+                        setViewMode("results");
+                        setCurrentResultIndex(0);
+                    }}
+                    className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                        viewMode === "results" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                    }`}
+                >
+                    View Results
+                </button>
+            </div>
 
-                                    let ratingConfig: RatingInputProps = {
-                                        range: 5,
-                                        displayType: "star",
-                                        allowHalfSteps: false,
-                                        minText: "Very bad",
-                                        maxText: "Perfect",
-                                        value: 0,
-                                        onChange: (val: number) => handleResponseChange(question.id, String(val)),
-                                        interactive: true,
-                                    };
-                                    if (JSON.parse(question.possible_answers).length > 0) {
-                                        try {
-                                            const parsed = JSON.parse(JSON.parse(question.possible_answers)[0]);
-                                            ratingConfig = {
-                                                range: parsed.range || 5,
-                                                displayType: parsed.displayType || "star",
-                                                allowHalfSteps: parsed.allowHalfSteps || false,
-                                                minText: parsed.minText || "Very bad",
-                                                maxText: parsed.maxText || "Perfect",
-                                                value: Number(responses[question.id] || 0),
+            {/* Conditional Rendering based on viewMode */}
+            {viewMode === "questions" ? (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInLeft">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Questions</h2>
+                    {questions.length > 0 ? (
+                        <form onSubmit={handleSubmitResponses} className="space-y-6">
+                            {questions.map((question, i) => (
+                                <div key={question.id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                                        {question.survey_text}
+                                    </h3>
+                                    {question.type === "multiple-choice" || question.type === "multiple_choice" ? (
+                                        <>
+                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Select an Answer:</p>
+                                            <div className="space-y-3">
+                                                {question.possible_answers.map((option: string, idx: number) => (
+                                                    <label key={idx} className="flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            name={`${question.id}-${i}`}
+                                                            value={option}
+                                                            checked={responses[question.id] === option}
+                                                            onChange={(e) => handleResponseChange(question.id, e.target.value)}
+                                                            className="appearance-none w-5 h-5 border border-gray-300 rounded-full checked:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 mr-3"
+                                                        />
+                                                        <span className="text-base text-gray-800 dark:text-gray-200">{option}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </>
+                                    ) : question.type === "rating" ? (
+                                        (() => {
+                                            let ratingConfig: RatingInputProps = {
+                                                range: 5,
+                                                displayType: "star",
+                                                allowHalfSteps: false,
+                                                minText: "Very bad",
+                                                maxText: "Perfect",
+                                                value: 0,
                                                 onChange: (val: number) => handleResponseChange(question.id, String(val)),
                                                 interactive: true,
                                             };
-
-                                        } catch (e) {
-                                            console.error("Error parsing rating settings", e);
-                                        }
-                                    }
-                                    return <RatingInput {...ratingConfig} />;
-                                })()
-                            ) : (
-                                <>
-                                    <h4 className="text-md font-semibold text-gray-600 dark:text-gray-400">Your Answer:</h4>
-                                    <div className="mt-1">
-                    <textarea
-                        name={question.id}
-                        placeholder="Type your answer here..."
-                        value={responses[question.id] || ""}
-                        maxLength={1000}
-                        onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                        className="w-full p-2 border rounded bg-gray-900"
-                    />
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
-                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Submit Responses
-                    </button>
-                </form>
-            ) : (
-                <p>Loading questions...</p>
-            )}
-
-            {/* Multiple Choice Results */}
-            <div className="mt-8">
-                <h2 className="text-3xl font-bold text-white">Multiple Choice Results</h2>
-                <div className="mt-4">
-                    {questions
-                        .filter((q) => q.type === "multiple-choice" && results[q.id])
-                        .map((question) => {
-                            const responseArray = results[question.id];
-                            const optionCounts = question.possible_answers.map((option) => ({
-                                text: option,
-                                count: responseArray.filter((resp) => resp.answer_value === option).length,
-                            }));
-                            return (
-                                <div key={question.id} className="mb-8">
-                                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                                        Results for: {question.survey_text}
-                                    </h3>
-                                    <BarChart questionText={question.survey_text} answerValues={optionCounts} />
+                                            if (JSON.parse(question.possible_answers).length > 0) {
+                                                try {
+                                                    const parsed = JSON.parse(JSON.parse(question.possible_answers)[0]);
+                                                    ratingConfig = {
+                                                        range: parsed.range || 5,
+                                                        displayType: parsed.displayType || "star",
+                                                        allowHalfSteps: parsed.allowHalfSteps || false,
+                                                        minText: parsed.minText || "Very bad",
+                                                        maxText: parsed.maxText || "Perfect",
+                                                        value: Number(responses[question.id] || 0),
+                                                        onChange: (val: number) => handleResponseChange(question.id, String(val)),
+                                                        interactive: true,
+                                                    };
+                                                } catch (e) {
+                                                    console.error("Error parsing rating settings", e);
+                                                }
+                                            }
+                                            return <RatingInput {...ratingConfig} />;
+                                        })()
+                                    ) : (
+                                        <>
+                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Your Answer:</p>
+                                            <div>
+                        <textarea
+                            name={question.id}
+                            placeholder="Type your answer here..."
+                            value={responses[question.id] || ""}
+                            maxLength={1000}
+                            onChange={(e) => handleResponseChange(question.id, e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+                        />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                            );
-                        })}
+                            ))}
+                            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-md transition-all shadow-md">
+                                Submit Responses
+                            </button>
+                        </form>
+                    ) : (
+                        <p className="text-gray-800 dark:text-gray-100">No questions found.</p>
+                    )}
                 </div>
-            </div>
-
-            {/* Text Response Results with Collapsible Panels */}
-            <div className="mt-8">
-                <h2 className="text-3xl font-bold text-white">Text Responses</h2>
-                <div className="mt-4 space-y-4">
-                    {questions
-                        .filter((q) => q.type === "text" && results[q.id])
-                        .map((question) => (
-                            <TextResponsePanel key={question.id} question={question} responses={results[question.id]} />
-                        ))}
+            ) : (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInRight">
+                    {totalResults > 0 && (
+                        <div className="mb-6 flex justify-between items-center">
+                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                Question {currentResultIndex + 1} of {totalResults}
+                            </p>
+                            <div className="space-x-3">
+                                <button
+                                    onClick={() => setCurrentResultIndex((prev) => Math.max(prev - 1, 0))}
+                                    disabled={currentResultIndex === 0}
+                                    className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        setCurrentResultIndex((prev) =>
+                                            Math.min(prev + 1, totalResults - 1)
+                                        )
+                                    }
+                                    disabled={currentResultIndex === totalResults - 1}
+                                    className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {totalResults === 0 ? (
+                        <p className="text-gray-800 dark:text-gray-100">No aggregated results yet...</p>
+                    ) : (
+                        (() => {
+                            const aggResult = aggregatedResultsArray[currentResultIndex];
+                            if (aggResult.type === "multiple-choice" || aggResult.type === "multiple_choice") {
+                                return (
+                                    <div className="mb-6">
+                                        <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
+                                            {aggResult.question_text}
+                                        </h3>
+                                        {aggResult.options ? (
+                                            <BarChart
+                                                questionText={aggResult.question_text}
+                                                answerValues={aggResult.options.map((opt) => ({
+                                                    text: opt.option_text,
+                                                    count: opt.count,
+                                                }))}
+                                            />
+                                        ) : (
+                                            <p className="text-gray-800 dark:text-gray-100">No options data.</p>
+                                        )}
+                                    </div>
+                                );
+                            } else if (aggResult.type === "rating") {
+                                return (
+                                    <div className="mb-6">
+                                        <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
+                                            {aggResult.question_text}
+                                        </h3>
+                                        <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">
+                                            Average Rating: {aggResult.average_rating ? aggResult.average_rating.toFixed(1) : "N/A"} / 5
+                                        </p>
+                                        {aggResult.distribution ? (
+                                            <RatingDistributionChart
+                                                questionText={aggResult.question_text}
+                                                distribution={aggResult.distribution}
+                                            />
+                                        ) : (
+                                            <p className="text-gray-800 dark:text-gray-100">No distribution data.</p>
+                                        )}
+                                    </div>
+                                );
+                            } else if (aggResult.type === "text") {
+                                return (
+                                    <TextResponsePanel
+                                        question={{
+                                            id: aggResult.question_id,
+                                            survey_text: aggResult.question_text,
+                                            type: aggResult.type,
+                                            possible_answers: [],
+                                        }}
+                                        responses={[]}
+                                    />
+                                );
+                            }
+                            return null;
+                        })()
+                    )}
                 </div>
-            </div>
+            )}
         </div>
     );
 };
