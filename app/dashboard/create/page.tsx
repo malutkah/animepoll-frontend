@@ -49,7 +49,7 @@ const CreateSurveyPage = () => {
         setIsLoading(true);
 
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey/genres")
+            const res = await fetch("http://localhost:8080/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");
