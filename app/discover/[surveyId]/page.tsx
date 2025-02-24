@@ -22,6 +22,11 @@ interface Survey {
     genre_id?: string;
 }
 
+interface AggregatedTextResponse {
+    answer_value: string;
+    submitted_at: string;
+}
+
 interface AggregatedQuestionResult {
     question_id: string;
     question_text: string;
@@ -30,6 +35,8 @@ interface AggregatedQuestionResult {
     options?: { option_text: string; count: number; percentage: number }[];
     average_rating?: number;
     distribution?: { [key: string]: number };
+    // New optional field for text responses:
+    responses?: AggregatedTextResponse[];
 }
 
 interface AggregatedSurveyResult {
@@ -55,14 +62,16 @@ const TextResponsePanel = ({
                                responses,
                            }: {
     question: Question;
-    responses: string[];
+    responses: AggregatedTextResponse[];
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
     const sortedResponses = [...responses].sort((a, b) => {
         // Simple sort (could be replaced with timestamp-based sort)
-        return sortOrder === "newest" ? -1 : 1;
+        return sortOrder === "newest"
+            ? new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+            : new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime();
     });
 
     return (
@@ -91,7 +100,8 @@ const TextResponsePanel = ({
                     <ul className="divide-y divide-gray-700">
                         {sortedResponses.map((resp, idx) => (
                             <li key={idx} className="py-2 transition-opacity duration-300 hover:bg-gray-600">
-                                <div className="text-base">{resp}</div>
+                                <div className="text-base">{resp.answer_value}</div>
+                                <div className="text-xs text-gray-400">{formatTimestamp(resp.submitted_at)}</div>
                             </li>
                         ))}
                     </ul>
@@ -363,14 +373,14 @@ const PublicSurveyPage = () => {
                                         <>
                                             <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Your Answer:</p>
                                             <div>
-                        <textarea
-                            name={question.id}
-                            placeholder="Type your answer here..."
-                            value={responses[question.id] || ""}
-                            maxLength={1000}
-                            onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
-                        />
+                                                <textarea
+                                                    name={question.id}
+                                                    placeholder="Type your answer here..."
+                                                    value={responses[question.id] || ""}
+                                                    maxLength={1000}
+                                                    onChange={(e) => handleResponseChange(question.id, e.target.value)}
+                                                    className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+                                                />
                                             </div>
                                         </>
                                     )}
@@ -465,7 +475,7 @@ const PublicSurveyPage = () => {
                                             type: aggResult.type,
                                             possible_answers: [],
                                         }}
-                                        responses={[]}
+                                        responses={aggResult.responses || []}
                                     />
                                 );
                             }
