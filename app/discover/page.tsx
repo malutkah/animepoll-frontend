@@ -22,16 +22,6 @@ interface AnimeGenre {
 
 type AnimeGenres = AnimeGenre[];
 
-export const formatTimestamp = (s: string): string => {
-    const date = new Date(s);
-    const day = date.getUTCDate().toString().padStart(2, "0");
-    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-    const year = date.getUTCFullYear();
-    const hours = date.getUTCHours().toString().padStart(2, "0");
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-    return `${day}.${month}.${year}  ${hours}:${minutes}`;
-};
-
 const DiscoverPage = () => {
     const [surveys, setSurveys] = useState<Survey[]>([]);
     const [error, setError] = useState("");
