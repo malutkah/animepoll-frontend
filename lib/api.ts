@@ -1,7 +1,7 @@
 // export const baseURL = window.location.href.startsWith("https://api.animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
 
 export const baseURL = (): string => {
-    return window.location.href.startsWith("https://api.animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
+    return window.location.href.startsWith("https://animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
 }
 
 export async function authFetch(endpoint: string, options: RequestInit = {}) {
