@@ -72,17 +72,16 @@ const DiscoverPage = () => {
     }, []);
 
     // Filter surveys based on search term and selected genres, then sort by update_timestamp
-    const filteredSurveys = surveys
-        .filter((survey) => {
-            const searchMatch =
-                survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredSurveys = surveys && surveys.filter((survey) => {
+            const searchMatch = survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 survey.description.toLowerCase().includes(searchTerm.toLowerCase());
-            const genreMatch =
-                selectedGenres.length === 0 ||
+
+            const genreMatch = selectedGenres.length === 0 ||
                 selectedGenres.includes(survey.genre_name);
+
             return searchMatch && genreMatch;
-        })
-        .sort((a, b) => {
+
+        }).sort((a, b) => {
             const dateA = new Date(a.update_timestamp).getTime();
             const dateB = new Date(b.update_timestamp).getTime();
             return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
