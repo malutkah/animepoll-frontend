@@ -7,7 +7,7 @@ import BarChart from "@/app/components/BarChart";
 import RatingInput, { RatingInputProps } from "@/app/components/RatingInput";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
-import {authFetch, baseURL} from "@/lib/api";
+import {authFetch, baseURL, wsURL} from "@/lib/api";
 
 const PublicSurveyPage = () => {
     const params = useParams() as { surveyId: string };
@@ -38,7 +38,7 @@ const PublicSurveyPage = () => {
     useEffect(() => {
         let ws: WebSocket;
         const connectWebSocket = () => {
-            ws = new WebSocket(`ws://localhost:8080/poll/ws/survey/${params.surveyId}`);
+            ws = new WebSocket(`ws://${wsURL()}/poll/ws/survey/${params.surveyId}`);
             ws.onopen = () => {
                 console.log("Connected to WebSocket for survey:", params.surveyId);
             };
