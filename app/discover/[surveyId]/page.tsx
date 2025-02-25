@@ -38,7 +38,9 @@ const PublicSurveyPage = () => {
     useEffect(() => {
         let ws: WebSocket;
         const connectWebSocket = () => {
-            ws = new WebSocket(`ws://${wsURL()}/poll/ws/survey/${params.surveyId}`);
+            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const wsUrl = `${wsProtocol}://${wsURL()}/poll/ws/survey/${params.surveyId}`
+            ws = new WebSocket(wsUrl);
             ws.onopen = () => {
                 console.log("Connected to WebSocket for survey:", params.surveyId);
             };
