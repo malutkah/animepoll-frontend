@@ -1,4 +1,6 @@
-import React, {useEffect, useState} from "react";
+"use client"
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PollIcon, CommunityIcon, PersonalizationIcon } from "./Icons";
 
@@ -19,16 +21,26 @@ const FeatureCard = ({ icon, title, description }: FeatureCardProps) => {
 };
 
 const LandingPage = () => {
-    const [loggedIn, setLoggedIn] = useState(false)
+    const [loggedIn, setLoggedIn] = useState(false);
+
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const token = localStorage.getItem("token")
-            setLoggedIn(!!token)
+            const token = localStorage.getItem("token");
+            setLoggedIn(!!token);
         }
-    }, [])
+    }, []);
+
+    const isMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
 
     return (
         <div className="text-center">
+            {isMaintenance && (
+                <div className="bg-orange-300 p-4 mb-4">
+                    <marquee className="text-3xl font-bold text-black">
+                        The website is currently under maintenance. Some features are temporarily unavailable.
+                    </marquee>
+                </div>
+            )}
             <h1 className="text-5xl font-bold mb-6 text-gray-800 dark:text-gray-100">
                 Welcome to <span className="text-indigo-600 dark:text-indigo-400">AnimePoll</span>
             </h1>
@@ -68,7 +80,7 @@ const LandingPage = () => {
                 <Link
                     href={"/prelaunch-signup"}
                     aria-disabled={true}
-                    className=" pointer-events-none bg-gray-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
+                    className="pointer-events-none bg-gray-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
                     Sign Up for Pre-Launch
                 </Link>
