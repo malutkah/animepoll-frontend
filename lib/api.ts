@@ -4,6 +4,10 @@ export const baseURL = (): string => {
     return window.location.href.startsWith("https://animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
 }
 
+export const wsURL = (): string => {
+    return window.location.href.startsWith("https://animepoll") ? "api.animepoll.net" : "localhost:8080";
+}
+
 export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const token = localStorage.getItem("token");
     const expiresAt = localStorage.getItem("expires_at");
