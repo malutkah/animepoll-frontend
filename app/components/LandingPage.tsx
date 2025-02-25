@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Link from "next/link";
 import { PollIcon, CommunityIcon, PersonalizationIcon } from "./Icons";
 
@@ -19,6 +19,14 @@ const FeatureCard = ({ icon, title, description }: FeatureCardProps) => {
 };
 
 const LandingPage = () => {
+    const [loggedIn, setLoggedIn] = useState(false)
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const token = localStorage.getItem("token")
+            setLoggedIn(!!token)
+        }
+    }, [])
+
     return (
         <div className="text-center">
             <h1 className="text-5xl font-bold mb-6 text-gray-800 dark:text-gray-100">
@@ -46,23 +54,21 @@ const LandingPage = () => {
 
             <div className="space-x-4">
                 <Link
-                    href="/signup"
-                    aria-disabled={true}
-                    className="pointer-events-none bg-gray-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
+                    href={loggedIn ? "/dashboard" : "/signup"}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
                     Get Started
                 </Link>
                 <Link
-                    href="/login"
-                    className="pointer-events-none bg-gray-600 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
-
-                    aria-disabled={true}
+                    href={loggedIn ? "/dashboard" : "/login"}
+                    className="bg-pink-700 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
                 >
                     Login
                 </Link>
                 <Link
                     href={"/prelaunch-signup"}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
+                    aria-disabled={true}
+                    className=" pointer-events-none bg-gray-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
                     Sign Up for Pre-Launch
                 </Link>
