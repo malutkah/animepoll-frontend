@@ -18,7 +18,7 @@ const CreateSurveyPage = () => {
     const [visibility, setVisibility] = useState('private')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const [genres, setGenres] = useState<AnimeGenres | []>([])
+    const [genres, setGenres] = useState<AnimeGenre[]>([])
     const [genreId, setGenreId] = useState('')
     const [genre, setGenre] = useState('')
     const router = useRouter()
@@ -71,7 +71,8 @@ const CreateSurveyPage = () => {
         const selected = e.target.value;
         console.log('selected',selected)
 
-        const g = genres.find((g) => g.name === selected);
+        const g = genres.find((g: AnimeGenre) => g.name === selected);
+
         console.log('g',g)
         if (g) {
             setGenre(g.name)

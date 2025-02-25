@@ -174,7 +174,7 @@ const SurveyDetailPage = () => {
 
                 {viewMode === "questions" ? (
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInLeft">
-                        < h2 className="text-2xl font-semibold mb-2"> Questions < /h2>
+                        <h2 className="text-2xl font-semibold mb-2"> Questions </h2>
                         {!questions || questions.length === 0 ? (
                             <p>No questions found.</p>
                         ) : (

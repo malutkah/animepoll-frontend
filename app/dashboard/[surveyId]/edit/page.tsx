@@ -20,7 +20,7 @@ interface Question {
     id: string;
     survey_text: string;
     type: string;
-    possible_answers: string[];
+    possible_answers: any;
 }
 
 interface AnimeGenre {

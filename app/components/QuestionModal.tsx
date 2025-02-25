@@ -35,6 +35,7 @@ const QuestionModal = ({ surveyId, question, onClose, onSave }: QuestionModalPro
     const initialRatingConfig = (() => {
         if (question.type === "rating" && question.possible_answers.length > 0) {
             try {
+                //@ts-ignore
                 return JSON.parse(JSON.parse(question.possible_answers)[0])
             } catch (err) {
                 return defaultRatingConfig
