@@ -6,7 +6,8 @@ import { useToast } from "@/app/components/ToastProvider";
 import BarChart from "@/app/components/BarChart";
 import RatingInput, { RatingInputProps } from "@/app/components/RatingInput";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
-import TextResponsePanel from '@/app/components/TextResponsePanel'
+import TextResponsePanel from "@/app/components/TextResponsePanel";
+import { authFetch } from "@/lib/api";
 
 const PublicSurveyPage = () => {
     const params = useParams() as { surveyId: string };
@@ -15,20 +16,60 @@ const PublicSurveyPage = () => {
     const [survey, setSurvey] = useState<Survey | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [responses, setResponses] = useState<{ [key: string]: string }>({});
-    const [aggregatedResults, setAggregatedResults] = useState<{
-        [key: string]: AggregatedQuestionResult;
-    }>({});
+    const [aggregatedResults, setAggregatedResults] = useState<{ [key: string]: AggregatedQuestionResult }>({});
     const [error, setError] = useState("");
     const [genres, setGenres] = useState<{ id: string; name: string }[]>([]);
     const [genre, setGenre] = useState("");
 
     // Toggle state: "questions" or "results"
     const [viewMode, setViewMode] = useState<"questions" | "results">("questions");
-
     // For result pagination
     const [currentResultIndex, setCurrentResultIndex] = useState(0);
 
-    // Fetch survey details (for header info)
+    // Initial fetching of survey details, questions, results, and genres
+    useEffect(() => {
+        fetchSurveyDetails();
+        fetchQuestions();
+        fetchResults();
+        fetchAnimeGenres();
+    }, [params.surveyId]);
+
+    // WebSocket integration for real‑time updates
+    useEffect(() => {
+        let ws: WebSocket;
+        const connectWebSocket = () => {
+            ws = new WebSocket(`ws://localhost:8080/poll/ws/survey/${params.surveyId}`);
+            ws.onopen = () => {
+                console.log("Connected to WebSocket for survey:", params.surveyId);
+            };
+            ws.onmessage = (event) => {
+                try {
+                    const data: AggregatedSurveyResult = JSON.parse(event.data);
+                    if (data && data.questions) {
+                        const aggr = data.questions.reduce((acc: { [key: string]: AggregatedQuestionResult }, q) => {
+                            acc[q.question_id] = q;
+                            return acc;
+                        }, {});
+                        setAggregatedResults(aggr);
+                    }
+                } catch (err) {
+                    console.error("Error parsing WebSocket message:", err);
+                }
+            };
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+            ws.onclose = () => {
+                console.log("WebSocket connection closed, reconnecting in 5 seconds...");
+                setTimeout(connectWebSocket, 5000);
+            };
+        };
+        connectWebSocket();
+        return () => {
+            ws.close();
+        };
+    }, [params.surveyId]);
+
     const fetchSurveyDetails = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/public`);
@@ -49,7 +90,6 @@ const PublicSurveyPage = () => {
         }
     };
 
-    // Fetch genres
     const fetchAnimeGenres = async () => {
         try {
             const res = await fetch("http://localhost:8080/poll/survey/genres");
@@ -66,7 +106,6 @@ const PublicSurveyPage = () => {
         }
     };
 
-    // Fetch detailed questions for response submission
     const fetchQuestions = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions/public`);
@@ -82,7 +121,6 @@ const PublicSurveyPage = () => {
         }
     };
 
-    // Fetch aggregated results from the new endpoint
     const fetchResults = async () => {
         try {
             const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/results/public`);
@@ -111,13 +149,6 @@ const PublicSurveyPage = () => {
             setError("Failed to load results");
         }
     };
-
-    useEffect(() => {
-        fetchSurveyDetails();
-        fetchQuestions();
-        fetchResults();
-        fetchAnimeGenres();
-    }, [params.surveyId]);
 
     // Set genre name once survey and genres load
     useEffect(() => {
@@ -205,7 +236,6 @@ const PublicSurveyPage = () => {
                 </button>
             </div>
 
-            {/* Conditional Rendering based on viewMode */}
             {viewMode === "questions" ? (
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInLeft">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Questions</h2>
