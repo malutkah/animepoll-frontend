@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import {usePathname, useRouter} from "next/navigation"
 import ThemeToggle from "./ThemeToggle"
 import { Home, Search, User, LogOut, LogIn, UserPlus } from "lucide-react"
 
@@ -10,12 +10,22 @@ const Navbar = () => {
     const [loggedIn, setLoggedIn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const router = useRouter()
+    const pathname = usePathname()
 
+    // Check auth status on mount and whenever the pathname changes
     useEffect(() => {
-        if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token")
+        setLoggedIn(!!token)
+    }, [pathname])
+
+    // Listen to storage events for cross-tab changes
+    useEffect(() => {
+        const handleStorageChange = () => {
             const token = localStorage.getItem("token")
             setLoggedIn(!!token)
         }
+        window.addEventListener("storage", handleStorageChange)
+        return () => window.removeEventListener("storage", handleStorageChange)
     }, [])
 
     const handleLogout = () => {
