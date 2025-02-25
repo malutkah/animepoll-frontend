@@ -72,9 +72,6 @@ const SurveyDetailPage = () => {
                 return
             }
             const data = await res.json()
-
-            console.log(data)
-
             setQuestions(data)
         } catch (err) {
             console.error(err)
@@ -98,6 +95,7 @@ const SurveyDetailPage = () => {
                     acc[q.question_id] = q;
                     return acc;
                 }, {});
+                console.log('aggr', aggr)
                 setAggregatedResults(aggr);
                 if (!survey) {
                     setSurvey({
@@ -147,6 +145,7 @@ const SurveyDetailPage = () => {
                         </h1>
                         <p className="text-white text-lg mb-2">{survey.description}</p>
                         {genre && <p className="text-white text-base">Genre: {genre}</p>}
+                        <p className="text-white text-lg mb-2">Total Answers: {aggregatedResultsArray.reduce((n, {response_count}) => n + response_count, 0)}</p>
                     </div>
                 ) : (
                     <p>Loading survey details...</p>
