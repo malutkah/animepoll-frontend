@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react"
 import {useParams, useRouter} from "next/navigation"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
-import {authFetch, baseURL} from "@/lib/api"
+import {authFetch, baseURL, wsURL} from "@/lib/api"
 import BarChart from "@/app/components/BarChart";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
@@ -26,6 +26,44 @@ const SurveyDetailPage = () => {
 
     // For result pagination
     const [currentResultIndex, setCurrentResultIndex] = useState(0);
+
+
+    useEffect(() => {
+        let ws: WebSocket;
+        const connectWebSocket = () => {
+            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const wsUrl = `${wsProtocol}://${wsURL()}/poll/ws/survey/${params.surveyId}`
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+                console.log("Connected to WebSocket for survey:", params.surveyId);
+            };
+            ws.onmessage = (event) => {
+                try {
+                    const data: AggregatedSurveyResult = JSON.parse(event.data);
+                    if (data && data.questions) {
+                        const aggr = data.questions.reduce((acc: { [key: string]: AggregatedQuestionResult }, q) => {
+                            acc[q.question_id] = q;
+                            return acc;
+                        }, {});
+                        setAggregatedResults(aggr);
+                    }
+                } catch (err) {
+                    console.error("Error parsing WebSocket message:", err);
+                }
+            };
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+            ws.onclose = () => {
+                console.log("WebSocket connection closed, reconnecting in 5 seconds...");
+                setTimeout(connectWebSocket, 5000);
+            };
+        };
+        connectWebSocket();
+        return () => {
+            ws.close();
+        };
+    }, [params.surveyId]);
 
     const fetchSurveyDetails = async () => {
         try {
@@ -139,7 +177,7 @@ const SurveyDetailPage = () => {
                 {error && <p className="text-red-500">{error}</p>}
                 {survey ? (
                     <div
-                        className="bg-gradient-to-r from-purple-600 to-blue-500 py-8 px-6 rounded-lg shadow-lg animate-fadeIn mb-8">
+                        className="bg-gradient-to-r from-purple-600 to-blue-500 py-8 px-6 rounded-xl shadow-lg animate-fadeIn mb-8">
                         <h1 className="text-4xl font-extrabold text-white mb-3 flex items-center gap-2">
                             {survey.title} <span className="text-2xl animate-pulse">🎌🔥</span>
                         </h1>
@@ -155,7 +193,7 @@ const SurveyDetailPage = () => {
                 <div className="flex justify-center gap-8">
                     <button
                         onClick={() => setViewMode("questions")}
-                        className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                        className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                             viewMode === "questions" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                         }`}>Answer Survey
                     </button>
@@ -165,7 +203,7 @@ const SurveyDetailPage = () => {
                             setViewMode("results");
                             setCurrentResultIndex(0);
                         }}
-                        className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                        className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                             viewMode === "results" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                         }`}>View Results
                     </button>
@@ -173,14 +211,14 @@ const SurveyDetailPage = () => {
                 </div>
 
                 {viewMode === "questions" ? (
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInLeft">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideInLeft">
                         <h2 className="text-2xl font-semibold mb-2"> Questions </h2>
                         {!questions || questions.length === 0 ? (
                             <p>No questions found.</p>
                         ) : (
                             <ul className="mb-4">
                                 {questions && questions.map((q) => (
-                                    <li key={q.id} className="border p-2 mb-2">
+                                    <li key={q.id} className="border p-2 mb-2 rounded-xl">
                                         <p className="font-medium">Question: {q.survey_text}</p>
                                         <p className="font-medium">Type: {q.type === 'multiple-choice' ? "Multiple Choice" : q.type === 'text' ? "Text" : "Rating"}</p>
                                         <p className="font-medium">{q.type === 'multiple-choice' ? `Possible Answers: ${q.possible_answers.join(' ,')}` :
@@ -193,7 +231,7 @@ const SurveyDetailPage = () => {
                         }
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInRight">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideInRight">
                         {totalResults > 0 && (
                             <div className="mb-6 flex justify-between items-center">
                                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -203,7 +241,7 @@ const SurveyDetailPage = () => {
                                     <button
                                         onClick={() => setCurrentResultIndex((prev) => Math.max(prev - 1, 0))}
                                         disabled={currentResultIndex === 0}
-                                        className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                        className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                     >
                                         Previous
                                     </button>
@@ -214,7 +252,7 @@ const SurveyDetailPage = () => {
                                             )
                                         }
                                         disabled={currentResultIndex === totalResults - 1}
-                                        className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                        className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                     >
                                         Next
                                     </button>

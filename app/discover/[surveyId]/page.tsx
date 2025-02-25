@@ -204,7 +204,7 @@ const PublicSurveyPage = () => {
             {error && <p className="text-red-500">{error}</p>}
             {/* Survey Header */}
             {survey ? (
-                <div className="bg-gradient-to-r from-purple-600 to-blue-500 py-8 px-6 rounded-lg shadow-lg animate-fadeIn mb-8">
+                <div className="bg-gradient-to-r from-purple-600 to-blue-500 py-8 px-6 rounded-xl shadow-lg animate-fadeIn mb-8">
                     <h1 className="text-4xl font-extrabold text-white mb-3 flex items-center gap-2">
                         {survey.title} <span className="text-2xl animate-pulse">🎌🔥</span>
                     </h1>
@@ -219,7 +219,7 @@ const PublicSurveyPage = () => {
             <div className="flex justify-center gap-6">
                 <button
                     onClick={() => setViewMode("questions")}
-                    className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                    className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                         viewMode === "questions" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                 >
@@ -230,7 +230,7 @@ const PublicSurveyPage = () => {
                         setViewMode("results");
                         setCurrentResultIndex(0);
                     }}
-                    className={`text-lg px-6 py-3 rounded-md font-semibold transition-colors duration-300 ${
+                    className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                         viewMode === "results" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                 >
@@ -239,12 +239,12 @@ const PublicSurveyPage = () => {
             </div>
 
             {viewMode === "questions" ? (
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg animate-slideInLeft">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideInLeft">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Questions</h2>
                     {questions.length > 0 ? (
                         <form onSubmit={handleSubmitResponses} className="space-y-6">
                             {questions.map((question, i) => (
-                                <div key={question.id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 mb-6">
+                                <div key={question.id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 mb-6">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                         {question.survey_text}
                                     </h3>
@@ -308,14 +308,14 @@ const PublicSurveyPage = () => {
                                                     value={responses[question.id] || ""}
                                                     maxLength={1000}
                                                     onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                                                    className="w-full p-3 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+                                                    className="w-full p-3 border border-gray-300 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
                                                 />
                                             </div>
                                         </>
                                     )}
                                 </div>
                             ))}
-                            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-md transition-all shadow-md">
+                            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md">
                                 Submit Responses
                             </button>
                         </form>
@@ -334,7 +334,7 @@ const PublicSurveyPage = () => {
                                 <button
                                     onClick={() => setCurrentResultIndex((prev) => Math.max(prev - 1, 0))}
                                     disabled={currentResultIndex === 0}
-                                    className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                 >
                                     Previous
                                 </button>
@@ -345,7 +345,7 @@ const PublicSurveyPage = () => {
                                         )
                                     }
                                     disabled={currentResultIndex === totalResults - 1}
-                                    className="px-4 py-2 rounded-md bg-indigo-600 text-white disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                 >
                                     Next
                                 </button>

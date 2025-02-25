@@ -16,7 +16,7 @@ const TextResponsePanel = ({question,responses,}: {
     });
 
     return (
-        <div className="mb-6 border border-gray-300 rounded-lg overflow-hidden shadow-md">
+        <div className="mb-6 border border-gray-300 rounded-xl overflow-hidden shadow-md">
             <button
                 type="button"
                 className="w-full flex justify-between items-center bg-gray-800 text-white px-4 py-2 focus:outline-none"
