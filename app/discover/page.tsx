@@ -214,7 +214,7 @@ const DiscoverPage = () => {
 
             {/* Display Surveys */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredSurveys.length === 0 ? (
+                {!filteredSurveys || filteredSurveys.length === 0 ? (
                     <p className="text-white">No surveys found.</p>
                 ) : (
                     filteredSurveys.map((survey) => (
