@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from "react"
 import { useRouter } from "next/navigation"
-import ProtectedRoute from "../../components/ProtectedRoute"
+import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
 
 interface AnimeGenre {

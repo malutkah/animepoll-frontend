@@ -2,8 +2,8 @@
 
 import {useEffect, useState} from "react"
 import Link from "next/link"
-import ProtectedRoute from "../components/ProtectedRoute"
-import {authFetch, baseURL} from "../../lib/api"
+import ProtectedRoute from "@/app/components/ProtectedRoute"
+import {authFetch, baseURL} from "@/lib/api"
 import {useRouter} from "next/navigation"
 
 interface Survey {

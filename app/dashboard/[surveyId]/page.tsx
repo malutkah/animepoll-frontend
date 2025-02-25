@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react"
 import {useParams, useRouter} from "next/navigation"
-import ProtectedRoute from "../../components/ProtectedRoute"
+import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
 import BarChart from "@/app/components/BarChart";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";

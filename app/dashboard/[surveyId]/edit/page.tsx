@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import ProtectedRoute from "../../../components/ProtectedRoute";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 import {authFetch, baseURL} from "@/lib/api";
 import { useToast } from "@/app/components/ToastProvider";
 import DynamicOptionsInput from "@/app/components/DynamicOptionsInput";

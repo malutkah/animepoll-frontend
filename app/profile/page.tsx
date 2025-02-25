@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, ChangeEvent } from "react"
-import ProtectedRoute from "../components/ProtectedRoute"
+import ProtectedRoute from "@/app/components/ProtectedRoute"
 import { authFetch } from "@/lib/api"
 
 interface UserProfile {
