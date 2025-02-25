@@ -69,7 +69,7 @@ const QuestionModal = ({ surveyId, question, onClose, onSave }: QuestionModalPro
             answersArray = [JSON.stringify(ratingConfig)]
         }
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${surveyId}/questions/${question.id}`, {
+            const res = await authFetch(`/poll/survey/${surveyId}/questions/${question.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

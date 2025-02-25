@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react"
 import { useRouter } from "next/navigation"
 import ProtectedRoute from "../../components/ProtectedRoute"
-import { authFetch } from "@/lib/api"
+import {authFetch, baseURL} from "@/lib/api"
 
 interface AnimeGenre {
     id: string;
@@ -27,7 +27,7 @@ const CreateSurveyPage = () => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey", {
+            const res = await authFetch("/poll/survey", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title, description, visibility, 'genre_id':genreId })
@@ -49,7 +49,7 @@ const CreateSurveyPage = () => {
         setIsLoading(true);
 
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/genres")
+            const res = await fetch(baseURL()+"/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");

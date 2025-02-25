@@ -4,6 +4,7 @@ import Link from "next/link"
 import {FormEvent, useState} from "react"
 import {useRouter} from "next/navigation"
 import {Check, X, Eye} from "lucide-react";
+import {baseURL} from "@/lib/api";
 
 const SignupForm = () => {
     const [email, setEmail] = useState('')
@@ -100,7 +101,7 @@ const SignupForm = () => {
         setIsLoading(true)
 
         try {
-            const res = await fetch("http://localhost:8080/auth/register", {
+            const res = await fetch(baseURL()+"/auth/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({email, username, password}),

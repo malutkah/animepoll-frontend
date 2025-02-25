@@ -19,7 +19,7 @@ const PreLaunchPage = () => {
             return;
         }
 
-        const res = await fetch("http://localhost:8080/poll/presale/register", {
+        const res = await fetch("/poll/presale/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

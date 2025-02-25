@@ -1,4 +1,10 @@
-export async function authFetch(url: string, options: RequestInit = {}) {
+// export const baseURL = window.location.href.startsWith("https://api.animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
+
+export const baseURL = (): string => {
+    return window.location.href.startsWith("https://api.animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
+}
+
+export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const token = localStorage.getItem("token");
     const expiresAt = localStorage.getItem("expires_at");
 
@@ -14,7 +20,7 @@ export async function authFetch(url: string, options: RequestInit = {}) {
 
     const newOptions = { ...options, headers };
 
-    const res = await fetch(url, newOptions);
+    const res = await fetch(baseURL()+endpoint, newOptions);
     if (res.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("expires_at");

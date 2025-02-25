@@ -19,7 +19,7 @@ const CreateSurveyPage = () => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey", {
+            const res = await authFetch("/poll/survey", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title, description, visibility })

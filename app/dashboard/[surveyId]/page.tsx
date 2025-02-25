@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react"
 import {useParams, useRouter} from "next/navigation"
 import ProtectedRoute from "../../components/ProtectedRoute"
-import {authFetch} from "@/lib/api"
+import {authFetch, baseURL} from "@/lib/api"
 import BarChart from "@/app/components/BarChart";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
@@ -29,7 +29,7 @@ const SurveyDetailPage = () => {
 
     const fetchSurveyDetails = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`)
+            const res = await authFetch(`/poll/survey/${params.surveyId}`)
             if (!res.ok) {
                 const err = await res.json()
                 setError(err.message || "Failed to load survey details")
@@ -48,7 +48,7 @@ const SurveyDetailPage = () => {
     // Fetch genres
     const fetchAnimeGenres = async () => {
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/genres");
+            const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");
@@ -64,7 +64,7 @@ const SurveyDetailPage = () => {
 
     const fetchQuestions = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`)
+            const res = await authFetch(`/poll/survey/${params.surveyId}/questions`)
             if (res.status !== 200) {
                 const err = await res.json()
                 console.log(err)
@@ -83,7 +83,7 @@ const SurveyDetailPage = () => {
     // Fetch aggregated results from the new endpoint
     const fetchResults = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/results/public`);
+            const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/results/public`);
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load results");

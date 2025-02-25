@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react"
 import Link from "next/link"
 import ProtectedRoute from "../components/ProtectedRoute"
-import {authFetch} from "../../lib/api"
+import {authFetch, baseURL} from "../../lib/api"
 import {useRouter} from "next/navigation"
 
 interface Survey {
@@ -30,7 +30,7 @@ const DashboardPage = () => {
 
     const fetchSurveys = async () => {
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey/all")
+            const res = await authFetch("/poll/survey/all")
             if (!res.ok) {
                 const err = await res.json()
                 setError(err.message || "Failed to load surveys")
@@ -45,7 +45,7 @@ const DashboardPage = () => {
 
     const fetchAnimeGenres = async () => {
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/genres")
+            const res = await fetch(baseURL()+"/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");
@@ -80,7 +80,7 @@ const DashboardPage = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this survey?")) return
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${id}`, {
+            const res = await authFetch(`/poll/survey/${id}`, {
                 method: "DELETE"
             })
             if (!res.ok) {

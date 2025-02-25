@@ -7,7 +7,7 @@ import BarChart from "@/app/components/BarChart";
 import RatingInput, { RatingInputProps } from "@/app/components/RatingInput";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
-import { authFetch } from "@/lib/api";
+import {authFetch, baseURL} from "@/lib/api";
 
 const PublicSurveyPage = () => {
     const params = useParams() as { surveyId: string };
@@ -72,7 +72,7 @@ const PublicSurveyPage = () => {
 
     const fetchSurveyDetails = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/public`);
+            const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/public`);
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load survey details");
@@ -92,7 +92,7 @@ const PublicSurveyPage = () => {
 
     const fetchAnimeGenres = async () => {
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/genres");
+            const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");
@@ -108,7 +108,7 @@ const PublicSurveyPage = () => {
 
     const fetchQuestions = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions/public`);
+            const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/questions/public`);
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load questions");
@@ -123,7 +123,7 @@ const PublicSurveyPage = () => {
 
     const fetchResults = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/results/public`);
+            const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/results/public`);
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load results");
@@ -174,7 +174,7 @@ const PublicSurveyPage = () => {
             })),
         };
         try {
-            const res = await fetch(`http://localhost:8080/poll/survey/${params.surveyId}/responses/public`, {
+            const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/responses/public`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

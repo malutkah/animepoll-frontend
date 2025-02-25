@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "../../../components/ProtectedRoute";
-import { authFetch } from "@/lib/api";
+import {authFetch, baseURL} from "@/lib/api";
 import { useToast } from "@/app/components/ToastProvider";
 import DynamicOptionsInput from "@/app/components/DynamicOptionsInput";
 import QuestionModal from "@/app/components/QuestionModal";
@@ -73,7 +73,7 @@ const EditSurveyPage = () => {
 
     const fetchAnimeGenres = async () => {
         try {
-            const res = await authFetch("http://localhost:8080/poll/survey/genres");
+            const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
                 setUpdateError(err.message || "Failed to load genres");
@@ -110,7 +110,7 @@ const EditSurveyPage = () => {
 
     const fetchSurvey = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`);
+            const res = await authFetch(`/poll/survey/${params.surveyId}`);
             if (!res.ok) {
                 const err = await res.json();
                 setUpdateError(err.message || "Failed to load survey");
@@ -129,7 +129,7 @@ const EditSurveyPage = () => {
 
     const fetchQuestions = async () => {
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`);
+            const res = await authFetch(`/poll/survey/${params.surveyId}/questions`);
             if (!res.ok) {
                 const err = await res.json();
                 return;
@@ -163,7 +163,7 @@ const EditSurveyPage = () => {
         setUpdateLoading(true);
         setUpdateError("");
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}`, {
+            const res = await authFetch(`/poll/survey/${params.surveyId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ title, description, visibility, genre_id: genreId }),
@@ -220,7 +220,7 @@ const EditSurveyPage = () => {
         }
 
         try {
-            const res = await authFetch(`http://localhost:8080/poll/survey/${params.surveyId}/questions`, {
+            const res = await authFetch(`/poll/survey/${params.surveyId}/questions`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -258,7 +258,7 @@ const EditSurveyPage = () => {
     const handleDeleteQuestion = async (questionId: string) => {
         if (!confirm("Are you sure you want to delete this question?")) return;
         try {
-            const res = await authFetch(`http://localhost:8080/poll/question/${questionId}`, {
+            const res = await authFetch(`/poll/question/${questionId}`, {
                 method: "DELETE",
             });
             if (!res.ok) {

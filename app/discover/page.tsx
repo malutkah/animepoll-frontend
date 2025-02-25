@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { authFetch } from "@/lib/api";
+import {authFetch, baseURL} from "@/lib/api";
 import { useToast } from "@/app/components/ToastProvider";
 import BarChart from "@/app/components/BarChart";
 import { Filter } from "lucide-react";
@@ -36,7 +36,7 @@ const DiscoverPage = () => {
     // Fetch surveys for discovery
     const fetchPublicSurveys = async () => {
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/discover");
+            const res = await fetch(baseURL()+"/poll/survey/discover");
             if (!res.ok) {
                 const err = await res.json();
                 setError(err.message || err.error || "Failed to load public surveys");
@@ -52,7 +52,7 @@ const DiscoverPage = () => {
     // Fetch available genres
     const fetchAnimeGenres = async () => {
         try {
-            const res = await fetch("http://localhost:8080/poll/survey/genres");
+            const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
                 setError(err.message || "Failed to load genres");

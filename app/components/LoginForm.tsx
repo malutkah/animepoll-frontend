@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
+import {baseURL} from "@/lib/api";
 
 const LoginForm = () => {
   const [email, setEmail] = useState('')
@@ -16,7 +17,7 @@ const LoginForm = () => {
     setIsLoading(true)
 
     try {
-      const res = await fetch("http://localhost:8080/auth/login", {
+      const res = await fetch(baseURL()+"/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
