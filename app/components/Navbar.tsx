@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import {usePathname, useRouter} from "next/navigation"
 import ThemeToggle from "./ThemeToggle"
 import { Home, Search, User, LogOut, LogIn, UserPlus } from "lucide-react"
@@ -11,6 +11,7 @@ const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
+    const logo = "/logo_120_transparent.png"
 
     // Check auth status on mount and whenever the pathname changes
     useEffect(() => {
@@ -38,7 +39,9 @@ const Navbar = () => {
     return (
         <nav className="p-4 flex justify-between items-center bg-white dark:bg-gray-800 shadow-md relative">
             <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                <Home className="h-6 w-6" />
+                <div className="w-12 h-12 overflow-hidden mb-0">
+                    <img src={logo} alt="Anime Poll logo" className="w-full h-full object-cover"/>
+                </div>
                 <span>AnimePoll</span>
             </Link>
             {/* Desktop Navigation */}
