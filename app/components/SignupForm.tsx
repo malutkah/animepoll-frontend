@@ -11,6 +11,7 @@ const SignupForm = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [password2, setPassword2] = useState('')
+    const [betaKey, setBetaKey] = useState('')
 
     // Combined error for server or overall errors
     const [error, setError] = useState('')
@@ -104,7 +105,7 @@ const SignupForm = () => {
             const res = await fetch(baseURL()+"/auth/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email, username, password}),
+                body: JSON.stringify({email, username, password, "beta_key":betaKey}),
             })
 
             const data = await res.json()
@@ -233,6 +234,23 @@ const SignupForm = () => {
                     </p>
 
                 </div>
+
+                <div>
+                    <label htmlFor="username"
+                           className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Enter your Beta Key
+                    </label>
+                    <input
+                        type="password"
+                        id="betakey"
+                        name="betakey"
+                        value={betaKey}
+                        onChange={(e) => setBetaKey(e.target.value)}
+                        className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    {errorUsername && <p className="mt-2 text-red-400 text-sm">{errorUsername}</p>}
+                </div>
+
                 {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
                 <button
                     type="submit"
