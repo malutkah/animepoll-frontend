@@ -191,12 +191,10 @@ const DiscoverPage = () => {
                     <span className="text-white font-semibold">Sort by Date:</span>
                     <button
                         onClick={toggleSortOrder}
-                        className="relative inline-flex items-center h-6 w-11 rounded-full bg-gray-300 dark:bg-gray-600 focus:outline-none"
+                        className={`relative inline-flex items-center h-6 w-11 rounded-full ${sortOrder === "newest" ? "dark:bg-emerald-700 " : "dark:bg-gray-600 "} focus:outline-none`}
                     >
             <span
-                className={`inline-block w-4 h-4 bg-white rounded-full transform transition-transform ${
-                    sortOrder === "newest" ? "translate-x-1" : "translate-x-6"
-                }`}
+                className={`inline-block w-4 h-4 bg-white rounded-full transform transition-transform ${sortOrder === "newest" ? "translate-x-1" : "translate-x-6"}`}
             ></span>
                     </button>
                     <span className="text-white">
