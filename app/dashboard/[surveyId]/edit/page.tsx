@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, {useEffect, useState} from "react";
+import {useParams, useRouter} from "next/navigation";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import {authFetch, baseURL} from "@/lib/api";
-import { useToast } from "@/app/components/ToastProvider";
+import {useToast} from "@/app/components/ToastProvider";
 import DynamicOptionsInput from "@/app/components/DynamicOptionsInput";
 import QuestionModal from "@/app/components/QuestionModal";
+import {InfoIcon} from "lucide-react";
 
 interface Survey {
     id: string;
@@ -33,7 +34,7 @@ type AnimeGenres = AnimeGenre[];
 const EditSurveyPage = () => {
     const params = useParams() as { surveyId: string };
     const router = useRouter();
-    const { addToast } = useToast();
+    const {addToast} = useToast();
 
     const [survey, setSurvey] = useState<Survey | null>(null);
     const [title, setTitle] = useState("");
@@ -62,7 +63,7 @@ const EditSurveyPage = () => {
     const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
     const [disableQuestion, setDisableQuestion] = useState(true);
-    const [disableSurvey, setDisableSurvey] = useState(false);
+    const [disableSurveyUpdate, setDisableSurveyUpdate] = useState(false);
 
     // Genre states
     const [genres, setGenres] = useState<AnimeGenres>([]);
@@ -73,7 +74,7 @@ const EditSurveyPage = () => {
 
     const fetchAnimeGenres = async () => {
         try {
-            const res = await fetch(baseURL()+"/poll/survey/genres");
+            const res = await fetch(baseURL() + "/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
                 setUpdateError(err.message || "Failed to load genres");
@@ -101,9 +102,9 @@ const EditSurveyPage = () => {
 
     const checkVisibility = (value: string) => {
         if (value === "public" && (!questions || questions.length === 0)) {
-            setDisableSurvey(true);
+            setDisableSurveyUpdate(true);
         } else {
-            setDisableSurvey(false);
+            setDisableSurveyUpdate(false);
         }
         setVisibility(value);
     };
@@ -138,6 +139,7 @@ const EditSurveyPage = () => {
             setQuestions(data);
         } catch (err) {
             // Handle error silently
+            setUpdateError(err);
         }
     };
 
@@ -165,8 +167,8 @@ const EditSurveyPage = () => {
         try {
             const res = await authFetch(`/poll/survey/${params.surveyId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, visibility, genre_id: genreId }),
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({title, description, visibility, genre_id: genreId}),
             });
             if (!res.ok) {
                 const err = await res.json();
@@ -222,7 +224,7 @@ const EditSurveyPage = () => {
         try {
             const res = await authFetch(`/poll/survey/${params.surveyId}/questions`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     survey_text: questionText,
                     type: questionType,
@@ -267,6 +269,7 @@ const EditSurveyPage = () => {
             } else {
                 addToast("Question deleted successfully", "success");
                 fetchQuestions();
+                fetchSurvey();
             }
         } catch (err) {
             addToast("Failed to delete question", "error");
@@ -291,7 +294,8 @@ const EditSurveyPage = () => {
                     <h1 className="text-3xl font-bold mb-4">Edit Survey</h1>
                     {updateError && <p className="text-red-500">{updateError}</p>}
                     {survey ? (
-                        <form onSubmit={handleSurveyUpdate} className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
+                        <form onSubmit={handleSurveyUpdate}
+                              className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
                             <div>
                                 <label className="block font-medium">Title</label>
                                 <input
@@ -341,11 +345,18 @@ const EditSurveyPage = () => {
                                     <option value="public">Public</option>
                                     <option value="private">Private</option>
                                 </select>
+                                {disableSurveyUpdate ? (
+                                    <span className={"flex align-middle mt-4"}>
+                                        <InfoIcon className={"text-orange-400 mr-4"}/>
+                                        <p className={"text-orange-400"}>You can set your survey public once it has at least one question</p>
+                                    </span>
+                                ) : null}
                             </div>
                             <button
                                 type="submit"
-                                disabled={updateLoading || disableSurvey}
-                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${disableSurvey ? disabledButtonClasses : ""}`}
+                                id={"btn-survey-update"}
+                                disabled={updateLoading || disableSurveyUpdate}
+                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${disableSurveyUpdate ? disabledButtonClasses : ""}`}
                             >
                                 {updateLoading ? "Updating..." : "Update Survey"}
                             </button>
@@ -359,7 +370,8 @@ const EditSurveyPage = () => {
                 <div className="border-t pt-8">
                     <h2 className="text-2xl font-bold mb-4">Create New Question</h2>
                     {questionError && <p className="text-red-500">{questionError}</p>}
-                    <form onSubmit={handleQuestionCreate} className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
+                    <form onSubmit={handleQuestionCreate}
+                          className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
                         <div>
                             <label className="block font-medium">Question Text</label>
                             <input
@@ -386,7 +398,7 @@ const EditSurveyPage = () => {
                             </select>
                         </div>
                         {questionType === "multiple-choice" && (
-                            <DynamicOptionsInput options={options} onChange={setOptions} maxOptions={5} />
+                            <DynamicOptionsInput options={options} onChange={setOptions} maxOptions={5}/>
                         )}
                         {questionType === "rating" && (
                             <div className="space-y-4">
@@ -485,7 +497,8 @@ const EditSurveyPage = () => {
                                         ⋮
                                     </button>
                                     {activeContextMenu === question.id && (
-                                        <div className="absolute top-8 right-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-md z-10">
+                                        <div
+                                            className="absolute top-8 right-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-md z-10">
                                             <button
                                                 onClick={() => openEditModal(question)}
                                                 className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 w-full text-left"

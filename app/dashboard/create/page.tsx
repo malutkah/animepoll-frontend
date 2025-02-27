@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react"
 import { useRouter } from "next/navigation"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
+import {InfoIcon} from "lucide-react";
 
 interface AnimeGenre {
     id: string;
@@ -98,7 +99,7 @@ const CreateSurveyPage = () => {
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="border p-2 w-full"
+                            className="border p-2 w-full rounded-xl"
                             required
                         />
                     </div>
@@ -107,7 +108,7 @@ const CreateSurveyPage = () => {
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="border p-2 w-full"
+                            className="border p-2 w-full rounded-xl"
                             required
                         />
                     </div>
@@ -117,7 +118,7 @@ const CreateSurveyPage = () => {
                             <select
                                 value={genre}
                                 onChange={handleGenreSelect}
-                                className={"border p-2 w-full rounded"}
+                                className={"border p-2 w-full rounded-xl"}
                                 required
                             >
                                 <option value={""}>Select a Genre</option>
@@ -133,16 +134,20 @@ const CreateSurveyPage = () => {
                         <select
                             value={visibility}
                             onChange={(e) => setVisibility(e.target.value)}
-                            className="border p-2 w-full bg-gray-900 border-gray-300"
+                            className="border p-2 w-full bg-gray-900 border-gray-300 rounded-xl"
                         >
                             {/*<option value="public">Public</option>*/}
                             <option value="private">Private</option>
                         </select>
+                        <span className={"flex align-middle mt-4"}>
+                            <InfoIcon className={"text-orange-400 mr-4"} />
+                            <p className={"text-orange-400"}>You can set your survey public once it has at least one question</p>
+                        </span>
                     </div>
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="dark:bg-emerald-700 dark:hover:bg-green-800 text-white font-bold py-2 px-4 rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     >
                         {isLoading ? "Creating..." : "Create Survey"}
                     </button>
