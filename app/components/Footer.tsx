@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 
 
@@ -13,6 +15,11 @@ const Navbar = () => {
                 href="/imprint"
                 className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-sky-500"
             > Imprint </Link>
+
+            <Link
+                href="/contact"
+                className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-sky-500"
+            > Contact Me </Link>
         </div>
     )
 }

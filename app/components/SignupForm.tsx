@@ -251,6 +251,25 @@ const SignupForm = () => {
                     {errorUsername && <p className="mt-2 text-red-400 text-sm">{errorUsername}</p>}
                 </div>
 
+                <div>
+                    <label htmlFor={"accept-legal"} className={"flex text-sm font-medium text-gray-700 dark:text-gray-300"}>
+                    <input
+                        type={"checkbox"}
+                        id={"accept-legal-checkbox"}
+                        name={"accept-legal"}
+                        className={"inline-block mr-4"}
+                        required
+                    />
+                    <span>
+                        By submitting this form, I agree to the
+                        <Link href="/legal" target={"_blank"} className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline">
+                            privacy policy
+                        </Link>
+                    </span>
+
+                    </label>
+                </div>
+
                 {error && <p className="mt-2 text-red-400 text-sm">{error}</p>}
                 <button
                     type="submit"
