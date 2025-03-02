@@ -4,7 +4,7 @@ import {useEffect, useState} from "react"
 import Link from "next/link"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
-import {useRouter} from "next/navigation"
+import { useMessage } from "@/app/components/MessageBoxExport";
 
 interface Survey {
     id: string;
@@ -19,14 +19,13 @@ interface AnimeGenre {
     name: string;
 }
 
-type AnimeGenres = AnimeGenre[];
-
 const DashboardPage = () => {
     const [surveys, setSurveys] = useState<Survey[]>([])
     const [error, setError] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+    const { showMessage } = useMessage();
 
-    const [genres, setGenres] = useState<AnimeGenre[] | []>([])
+    const [genres, setGenres] = useState<AnimeGenre[]>([])
 
     const fetchSurveys = async () => {
         try {
@@ -77,22 +76,69 @@ const DashboardPage = () => {
         }
     }
 
+    // const handleDelete = async (id: string) => {
+    //     if (!confirm("Are you sure you want to delete this survey?")) return
+    //     try {
+    //         const res = await authFetch(`/poll/survey/${id}`, {
+    //             method: "DELETE"
+    //         })
+    //         if (!res.ok) {
+    //             const err = await res.json()
+    //             alert(err.message || "Failed to delete survey")
+    //         } else {
+    //             alert("Survey deleted")
+    //             fetchSurveys()
+    //         }
+    //     } catch (err) {
+    //         alert("Failed to delete survey")
+    //     }
+    // }
+
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this survey?")) return
-        try {
-            const res = await authFetch(`/poll/survey/${id}`, {
-                method: "DELETE"
-            })
-            if (!res.ok) {
-                const err = await res.json()
-                alert(err.message || "Failed to delete survey")
-            } else {
-                alert("Survey deleted")
-                fetchSurveys()
-            }
-        } catch (err) {
-            alert("Failed to delete survey")
-        }
+        const msgId = showMessage({
+            type: "question",
+            title: "Delete Survey",
+            message: "Are you sure you want to delete this survey? This action cannot be undone.",
+            onConfirm: async () => {
+                try {
+                    const res = await authFetch(`/poll/survey/${id}`, {
+                        method: "DELETE"
+                    })
+                    if (!res.ok) {
+                        const err = await res.json()
+                        showMessage({
+                            type: 'error',
+                            title: 'Deletion Failed',
+                            message: err.message || "Failed to delete question",
+                            showIcon: true,
+                            autoClose: true
+                        });
+                    } else {
+                        showMessage({
+                            type: 'success',
+                            title: 'Question Deleted',
+                            message: 'Question was successfully deleted',
+                            showIcon: true,
+                            autoClose: true
+                        });
+                        fetchSurveys()
+                    }
+                } catch (err) {
+                    showMessage({
+                        type: 'error',
+                        title: 'Deletion Failed',
+                        message: "An unexpected error occurred. Please try again.",
+                        showIcon: true,
+                        autoClose: true
+                    });
+                }
+            },
+            onCancel: () => {},
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            showIcon: true,
+            showCloseButton: false,
+        })
     }
 
     // Filter surveys based on search term
