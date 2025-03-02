@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import Navbar from "@/app/components/Navbar"
 import { ToastProvider } from "@/app/components/ToastProvider"
+import { MessageProvider } from "@/app/components/MessageBoxExport"
 import MaintenanceGate from "@/app/components/MaintenanceGate"
 import Footer from "@/app/components/Footer";
 
@@ -19,17 +20,19 @@ export default function RootLayout({ children }) {
         <html lang="en">
         <body className={mon.className}>
         <ThemeProvider attribute="class">
-            <ToastProvider>
-                <MaintenanceGate>
-                    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
-                        <Navbar />
-                        <main className="container mx-auto px-4 py-8 flex-1">
-                            {children}
-                        </main>
-                        <Footer />
-                    </div>
-                </MaintenanceGate>
-            </ToastProvider>
+            <MessageProvider>
+                <ToastProvider>
+                    <MaintenanceGate>
+                        <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+                            <Navbar />
+                            <main className="container mx-auto px-4 py-8 flex-1">
+                                {children}
+                            </main>
+                            <Footer />
+                        </div>
+                    </MaintenanceGate>
+                </ToastProvider>
+            </MessageProvider>
         </ThemeProvider>
         </body>
         </html>
