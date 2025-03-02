@@ -3,6 +3,7 @@
 import { Bar } from "react-chartjs-2";
 import { CategoryScale, Chart } from "chart.js";
 import 'chart.js/auto';
+import { useMemo, memo } from 'react';
 
 Chart.register(CategoryScale);
 
@@ -16,7 +17,7 @@ interface BarChartProps {
     answerValues: AnswerValue[];
 }
 
-// Preset array of 5 appealing colors
+// Preset array of 5 appealing colors - moved outside component to avoid recreation
 const colorPresets = [
     "rgba(54, 162, 235, 0.8)",   // blue
     "rgba(255, 99, 132, 0.8)",   // red
@@ -25,27 +26,36 @@ const colorPresets = [
     "rgba(153, 102, 255, 0.8)"   // purple
 ];
 
-const BarChart = (props: BarChartProps) => {
-    // The max value on the x-axis is the total count of responses for the question.
-    const totalCount = props.answerValues.reduce((acc, curr) => curr.count > acc ? curr.count : acc, 0);
+const BarChart = memo((props: BarChartProps) => {
+    // Memoize totalCount calculation
+    const totalCount = useMemo(() => {
+        return props.answerValues.reduce((acc, curr) => curr.count > acc ? curr.count : acc, 0);
+    }, [props.answerValues]);
 
-    const barDataset = props.answerValues.map((value, index) => {
-        const bgColor = colorPresets[index % colorPresets.length];
-        const borderColor = bgColor;
+    // Memoize barDataset calculation
+    const barDataset = useMemo(() => {
+        return props.answerValues.map((value, index) => {
+            const bgColor = colorPresets[index % colorPresets.length];
+            const borderColor = bgColor;
+            return {
+                label: value.text,
+                data: [value.count],
+                backgroundColor: [bgColor],
+                borderColor: [borderColor],
+                borderWidth: 1,
+            };
+        });
+    }, [props.answerValues]);
+
+    // Memoize data object
+    const data = useMemo(() => {
         return {
-            label: value.text,
-            data: [value.count],
-            backgroundColor: [bgColor],
-            borderColor: [borderColor],
-            borderWidth: 1,
+            labels: [props.questionText],
+            datasets: barDataset,
         };
-    });
+    }, [props.questionText, barDataset]);
 
-    const data = {
-        labels: [props.questionText],
-        datasets: barDataset,
-    };
-
+    // Options don't depend on props, could be moved outside component or memoized if needed
     const options = {
         indexAxis: 'y' as const,
         scales: {
@@ -78,6 +88,9 @@ const BarChart = (props: BarChartProps) => {
             <Bar data={data} options={options} />
         </div>
     );
-};
+});
+
+// Add display name for debugging
+BarChart.displayName = 'BarChart';
 
 export default BarChart;

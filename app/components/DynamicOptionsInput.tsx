@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, memo } from "react"
 
 interface DynamicOptionsInputProps {
     options: string[]
@@ -8,22 +8,25 @@ interface DynamicOptionsInputProps {
     maxOptions?: number
 }
 
-const DynamicOptionsInput = ({ options, onChange, maxOptions }: DynamicOptionsInputProps) => {
-    const handleOptionChange = (index: number, value: string) => {
+const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOptionsInputProps) => {
+    // Memoize event handlers to prevent unnecessary re-renders
+    const handleOptionChange = useCallback((index: number, value: string) => {
         const newOptions = [...options]
         newOptions[index] = value
         onChange(newOptions)
-    }
+    }, [options, onChange]);
 
-    const handleAddOption = () => {
+    const handleAddOption = useCallback(() => {
         if (maxOptions && options.length >= maxOptions) return
         onChange([...options, ""])
-    }
+    }, [options, onChange, maxOptions]);
 
-    const handleRemoveOption = (index: number) => {
+    const handleRemoveOption = useCallback((index: number) => {
         const newOptions = options.filter((_, i) => i !== index)
         onChange(newOptions)
-    }
+    }, [options, onChange]);
+
+    const isMaxOptionsReached = maxOptions ? options.length >= maxOptions : false;
 
     return (
         <div>
@@ -37,7 +40,12 @@ const DynamicOptionsInput = ({ options, onChange, maxOptions }: DynamicOptionsIn
                         className="flex-1 p-2 border rounded"
                         placeholder={`Option ${index + 1}`}
                     />
-                    <button type="button" onClick={() => handleRemoveOption(index)} className="text-red-500">
+                    <button
+                        type="button"
+                        onClick={() => handleRemoveOption(index)}
+                        className="text-red-500"
+                        aria-label={`Remove option ${index + 1}`}
+                    >
                         Remove
                     </button>
                 </div>
@@ -45,23 +53,26 @@ const DynamicOptionsInput = ({ options, onChange, maxOptions }: DynamicOptionsIn
             <button
                 type="button"
                 onClick={handleAddOption}
-                className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded ${maxOptions && options.length >= maxOptions ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={maxOptions ? options.length >= maxOptions : false}
+                className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded ${isMaxOptionsReached ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={isMaxOptionsReached}
             >
                 Add Option
             </button>
-            {maxOptions && options.length >= maxOptions && (
+            {isMaxOptionsReached && (
                 <p className="text-sm text-gray-500">Maximum of {maxOptions} options reached.</p>
             )}
             {/*
-        Additional ideas for question types:
-        - Rating Scale (e.g., 1-5 stars)
-        - Ranking (order items based on preference)
-        - Matrix (multiple rows of choices)
-        - Open-Ended Text (for detailed responses)
-      */}
+            Additional ideas for question types:
+            - Rating Scale (e.g., 1-5 stars)
+            - Ranking (order items based on preference)
+            - Matrix (multiple rows of choices)
+            - Open-Ended Text (for detailed responses)
+            */}
         </div>
     )
-}
+});
 
-export default DynamicOptionsInput
+// Add display name for debugging
+DynamicOptionsInput.displayName = 'DynamicOptionsInput';
+
+export default DynamicOptionsInput;
