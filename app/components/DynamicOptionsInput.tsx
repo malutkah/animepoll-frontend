@@ -37,7 +37,7 @@ const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOpti
                         type="text"
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
-                        className="flex-1 p-2 border rounded"
+                        className="flex-1 p-2 border rounded-xl"
                         placeholder={`Option ${index + 1}`}
                     />
                     <button
@@ -53,7 +53,7 @@ const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOpti
             <button
                 type="button"
                 onClick={handleAddOption}
-                className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded ${isMaxOptionsReached ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-xl ${isMaxOptionsReached ? "opacity-50 cursor-not-allowed" : ""}`}
                 disabled={isMaxOptionsReached}
             >
                 Add Option
