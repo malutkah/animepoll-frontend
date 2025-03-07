@@ -83,7 +83,9 @@ const LoginForm = () => {
             }
 
             const data = await res.json();
+
             localStorage.setItem("token", data.access_token);
+            localStorage.setItem("refresh_token", data.refresh_token);
             localStorage.setItem("expires_at", data.expires_at.toString());
             router.push("/dashboard");
         } catch (err: any) {
@@ -159,6 +161,13 @@ const LoginForm = () => {
                 Don't have an account?{" "}
                 <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:underline">
                     Sign up
+                </Link>
+            </p>
+
+            <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
+                Forgot your password?{" "}
+                <Link href="/password-reset" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Change it here
                 </Link>
             </p>
         </div>
