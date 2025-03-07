@@ -1,7 +1,6 @@
 // export const baseURL = window.location.href.startsWith("https://api.animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
 
 export const baseURL = (): string => {
-    console.log(window.location.href)
     return window.location.href.startsWith("https://animepoll") ? "https://api.animepoll.net" : "http://localhost:8080";
 }
 
