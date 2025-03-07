@@ -3,6 +3,7 @@
 import React, { useEffect, useState, ChangeEvent } from "react"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
 import { authFetch } from "@/lib/api"
+import Link from "next/link";
 
 interface UserProfile {
     username: string;
@@ -257,6 +258,15 @@ const ProfilePage = () => {
                             readOnly
                             className="border p-2 w-full rounded-md shadow-sm bg-gray-600 cursor-not-allowed"
                         />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-lg font-semibold mb-1">Reset Your Password</label>
+                        <Link
+                            href={"/password-reset"}
+                            className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md"
+                        >
+                            Reset
+                        </Link>
                     </div>
                     <button
                         type="submit"
