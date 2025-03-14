@@ -166,7 +166,7 @@ const LoginForm = () => {
 
             <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
                 Forgot your password?{" "}
-                <Link href="/password-reset" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                <Link href="/password-reset-request" className="text-indigo-600 dark:text-indigo-400 hover:underline">
                     Change it here
                 </Link>
             </p>
