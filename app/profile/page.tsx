@@ -262,7 +262,7 @@ const ProfilePage = () => {
                     <div className="mb-4">
                         <label className="block text-lg font-semibold mb-1">Reset Your Password</label>
                         <Link
-                            href={"/password-reset"}
+                            href={"/password-reset-request"}
                             className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md"
                         >
                             Reset
