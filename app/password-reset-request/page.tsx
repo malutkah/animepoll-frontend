@@ -1,8 +1,8 @@
 "use client"
 import {useEffect, useState} from 'react';
 import { Mail, ArrowRight, Check } from 'lucide-react';
-import {usePathname} from "next/navigation";
-import {baseURL} from "@/lib/api";
+import {usePathname, useSearchParams} from "next/navigation";
+import {authFetch, baseURL} from "@/lib/api";
 
 const PasswordReset = () => {
     const [email, setEmail] = useState('');
@@ -11,6 +11,28 @@ const PasswordReset = () => {
     const [error, setError] = useState('');
     const [loggedIn, setLoggedIn] = useState(false)
     const pathname = usePathname()
+
+    const fetchProfile = async () => {
+        try {
+            const res = await authFetch("/user/me")
+            if (!res.ok) {
+                const err = await res.json()
+                setError(err.message || "Failed to load profile")
+                return
+            }
+            const data = await res.json()
+
+            setEmail(data.email)
+        } catch (err) {
+            setError("Failed to load profile")
+        }
+    }
+
+    useEffect(() => {
+        if (loggedIn) {
+            fetchProfile()
+        }
+    }, [loggedIn]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,7 +52,7 @@ const PasswordReset = () => {
                 body: JSON.stringify({"email": email})
             })
 
-            if (res.status !== 201) {
+            if (!res.ok) {
                 const err = await res.json();
                 setError(err.message);
                 setIsLoading(false);
@@ -81,6 +103,7 @@ const PasswordReset = () => {
                                         type="email"
                                         autoComplete="email"
                                         required
+                                        readOnly={loggedIn}
                                         className={`block w-full px-3 py-2 border ${error ? 'border-red-300 text-red-900' : 'border-gray-300 dark:border-gray-600'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm`}
                                         placeholder="you@example.com"
                                         value={email}

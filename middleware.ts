@@ -11,8 +11,10 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/', req.url))
     }
 
+    const check = true
+
     // check if toke param is valid
-    if (pathname === '/password-reset') {
+    if (pathname === '/password-reset' && check) {
         const params = req.nextUrl.searchParams.get("token");
         if (!params || params === "") {
             return NextResponse.redirect(new URL('/not-found', req.url))
@@ -22,6 +24,9 @@ export async function middleware(req: NextRequest) {
 
         const res = await fetch(base + "/user/check-reset-token?token="+params)
 
+
+        const data = await res.json()
+        console.log(data)
         if (res.status !== 200) {
             return NextResponse.redirect(new URL('/not-found', req.url))
         }
