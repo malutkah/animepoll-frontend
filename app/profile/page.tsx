@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useEffect, useState, ChangeEvent } from "react"
+import React, {useEffect, useState, ChangeEvent} from "react"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
-import { authFetch } from "@/lib/api"
+import {authFetch, baseURL} from "@/lib/api"
 import Link from "next/link";
+import ModalBox from "@/app/components/ModalBox";
 
 interface UserProfile {
     username: string;
@@ -12,6 +13,7 @@ interface UserProfile {
     age: number;
     gender: string;
     region: string;
+    totp_activated: boolean;
     // Optionally, backend may include a profilePicture URL field.
 }
 
@@ -30,11 +32,13 @@ const ProfilePage = () => {
     const [age, setAge] = useState<number | ''>('')
     const [gender, setGender] = useState('')
     const [region, setRegion] = useState('')
+    const [totpActivated, setTotpActivated] = useState('')
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [countries, setCountries] = useState<Countries[]>([])
     const [profilePic, setProfilePic] = useState<string>("/profile-pic-empty.svg")
+    const [openModalBox, setOpenModalBox] = useState<any>(undefined)
 
     // Simple email validation state (for instant feedback)
     const [emailError, setEmailError] = useState("")
@@ -54,8 +58,10 @@ const ProfilePage = () => {
             setAge(data.age)
             setGender(data.gender)
             setRegion(data.region)
+            setTotpActivated(data.totp_activated)
+
             // If a profile picture URL is provided from backend, use it.
-            if(data.profilePicture) {
+            if (data.profilePicture) {
                 setProfilePic(data.profilePicture)
             }
         } catch (err) {
@@ -124,15 +130,15 @@ const ProfilePage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if(emailError) return; // Prevent submit if validation error exists
+        if (emailError) return; // Prevent submit if validation error exists
         setIsLoading(true)
         setSuccess('')
         setError('')
         try {
             const res = await authFetch("/user/me", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, country, age, gender, region })
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, country, age, gender, region})
             })
             if (!res.ok) {
                 const err = await res.json()
@@ -158,6 +164,70 @@ const ProfilePage = () => {
         }
     }
 
+    const handleSendTOTPMail = async () => {
+        try {
+            setIsLoading(true)
+            const res = await authFetch("/user/send/totp-instructions", {
+                method: "POST",
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                const err = data.message;
+                setIsLoading(false)
+                setOpenModalBox(undefined)
+                setError(err)
+                return
+            }
+
+        } catch (err) {
+            console.error("Error details:", err);
+            setError(err.message || String(err) || "An error occurred");
+            setIsLoading(false);
+            setOpenModalBox(undefined);
+        }
+    }
+
+    const handleYesClick = async () => {
+        try {
+            setIsLoading(true)
+            const res = await authFetch("/user/disable-totp", {
+                method: "POST",
+            })
+
+            const data = await res.json()
+
+            if (res.status !== 200) {
+                const err = data.message;
+                setIsLoading(false)
+                setOpenModalBox(undefined)
+                setError(err)
+                return
+            }
+
+        } catch (err) {
+            console.error("Error details:", err);
+            setError(err.message || String(err) || "An error occurred");
+            setIsLoading(false);
+            setOpenModalBox(undefined);
+        }
+    }
+
+    const openModalMessageBox = (title: string, bodyText: string, footerText: string,
+                                 messageType: "info" | "warning" | "error",
+                                 buttonType: "ok" | "yesno" | "next") => {
+        setOpenModalBox({
+            title,
+            bodyText,
+            footerText,
+            messageType,
+            buttonType,
+            onNextClick: handleSendTOTPMail,
+            onYesClick: handleYesClick,
+    })
+    }
+
     return (
         <ProtectedRoute>
             <div className="max-w-3xl mx-auto px-4 py-8">
@@ -168,7 +238,7 @@ const ProfilePage = () => {
                 {/* Profile Picture Section */}
                 <div className="flex flex-col items-center mb-8">
                     <div className="w-32 h-32 rounded-full overflow-hidden mb-4">
-                        <img src={profilePic} alt="Profile Picture" className="w-full h-full object-cover" />
+                        <img src={profilePic} alt="Profile Picture" className="w-full h-full object-cover"/>
                     </div>
                     <input
                         type="file"
@@ -260,24 +330,55 @@ const ProfilePage = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Reset Your Password</label>
+                        {!totpActivated ? (
+                            <button
+                                type={"button"}
+                                value={"2FA"}
+                                onClick={() => openModalMessageBox("Enable 2FA", "continue to get the mail with instructions", "", "info", "next")}
+                                className={"w-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"}
+                            >Enable 2-Factor Authorization
+                            </button>
+                        ): (
+                            <button
+                                type={"button"}
+                                value={"2FA"}
+                                onClick={() => openModalMessageBox("Disable 2FA", "do you want to disable TOTP Verification?", "", "info", "yesno")}
+                                className={"w-full flex items-center justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"}
+                            >Disable 2-Factor Authorization
+                            </button>
+                        )}
+                    </div>
+                    <div className="mb-4">
                         <Link
                             href={"/password-reset-request"}
-                            className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md"
+                            className="w-full flex items-center justify-center bg-amber-500 hover:bg-amber-700 text-black font-bold py-3 px-4 rounded-md transition-colors shadow-md"
                         >
-                            Reset
+                            Reset Your Password
                         </Link>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        onClick={handleSubmit}
-                        className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md"
-                    >
-                        {isLoading ? "Updating..." : "Update Profile"}
-                    </button>
                 </div>
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    onClick={handleSubmit}
+                    className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"
+                >
+                    {isLoading ? "Updating..." : "Update Profile"}
+                </button>
             </div>
+            {openModalBox && (
+                <ModalBox
+                    title={openModalBox.title}
+                    messageType={openModalBox.messageType}
+                    footerText={openModalBox.footerText}
+                    bodyText={openModalBox.bodyText}
+                    onClose={() => setOpenModalBox(undefined)}
+                    buttonType={openModalBox.buttonType}
+                    onNextClick={openModalBox.onNextClick}
+                    onNoClick={() => setOpenModalBox(undefined)}
+                    onYesClick={openModalBox.onYesClick}
+                />
+            )}
         </ProtectedRoute>
     )
 }

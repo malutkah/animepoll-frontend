@@ -117,7 +117,6 @@ const SurveyDetailPage = () => {
         }
     }
 
-
     // Fetch aggregated results from the new endpoint
     const fetchResults = async () => {
         try {

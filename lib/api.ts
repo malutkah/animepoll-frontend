@@ -12,7 +12,7 @@ export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const token = localStorage.getItem("token");
     const expiresAt = localStorage.getItem("expires_at");
 
-    if (!token || !expiresAt || Number(expiresAt) * 1000 < Date.now()) {
+    if (!token || !expiresAt) {
         localStorage.removeItem("token");
         localStorage.removeItem("expires_at");
         window.location.href = "/login";
@@ -26,6 +26,12 @@ export async function authFetch(endpoint: string, options: RequestInit = {}) {
 
     const res = await fetch(baseURL()+endpoint, newOptions);
     if (res.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("expires_at");
+        window.location.href = "/login";
+        return Promise.reject("Unauthorized");
+    }
+    if (!res.ok) {
         localStorage.removeItem("token");
         localStorage.removeItem("expires_at");
         window.location.href = "/login";
