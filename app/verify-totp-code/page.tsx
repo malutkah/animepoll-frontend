@@ -1,12 +1,20 @@
 "use client"
 
-import { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import {useState, useEffect, FormEvent, ChangeEvent, Suspense} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {authFetch, baseURL} from "@/lib/api";
 import { Check, Shield } from "lucide-react";
 import Link from "next/link";
 
 const VerifyTotpCode = () => {
+    return (
+        <Suspense>
+            <Page />
+        </Suspense>
+    )
+}
+
+const Page = () => {
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
     const router = useRouter();
