@@ -244,13 +244,13 @@ const ProfilePage = () => {
                         type="file"
                         accept="image/png, image/jpeg"
                         onChange={handleProfilePicChange}
-                        className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:rounded-md file:text-sm file:font-semibold file:bg-blue-600 file:hover:bg-blue-700 file:hover:cursor-pointer"
+                        className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-900 file:rounded-xl file:text-sm file:font-semibold file:bg-blue-600 file:hover:bg-blue-700 file:hover:cursor-pointer"
                     />
                     <p className={"text-gray-500 text-xs"}>Max file size: 5MB</p>
                 </div>
 
                 {/* Personal Information Section */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
                     <h2 className="text-2xl font-bold mb-4 border-b pb-2">Personal Information</h2>
                     <div className="mb-4">
                         <label className="block text-lg font-semibold mb-1">Username</label>
@@ -258,7 +258,7 @@ const ProfilePage = () => {
                             type="text"
                             value={profile?.username || ""}
                             readOnly
-                            className="border p-2 w-full rounded-md shadow-sm bg-gray-600 cursor-not-allowed"
+                            className="border p-2 w-full rounded-xl shadow-sm bg-gray-600 cursor-not-allowed"
                         />
                     </div>
                     <div className="mb-4">
@@ -270,7 +270,7 @@ const ProfilePage = () => {
                                 setEmail(e.target.value);
                                 validateEmail(e.target.value);
                             }}
-                            className="border p-2 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            className="border p-2 w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             required
                         />
                         {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
@@ -281,7 +281,7 @@ const ProfilePage = () => {
                             <select
                                 value={country}
                                 onChange={handleCountryChange}
-                                className="border p-2 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                className="border p-2 w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             >
                                 <option value="">Select a country</option>
                                 {countries.map((c) => (
@@ -300,7 +300,7 @@ const ProfilePage = () => {
                             type="number"
                             value={age}
                             onChange={(e) => setAge(Number(e.target.value))}
-                            className="border p-2 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            className="border p-2 w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                         />
                     </div>
                     <div>
@@ -308,7 +308,7 @@ const ProfilePage = () => {
                         <select
                             value={gender}
                             onChange={(e) => setGender(e.target.value)}
-                            className="border p-2 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            className="border p-2 w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                         >
                             <option value={"m"}>Male</option>
                             <option value={"f"}>Female</option>
@@ -318,7 +318,7 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Account Settings Section */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <h2 className="text-2xl font-bold mb-4 border-b pb-2">Account Settings</h2>
                     <div className="mb-4">
                         <label className="block text-lg font-semibold mb-1">Region</label>
@@ -326,7 +326,7 @@ const ProfilePage = () => {
                             type="text"
                             value={region}
                             readOnly
-                            className="border p-2 w-full rounded-md shadow-sm bg-gray-600 cursor-not-allowed"
+                            className="border p-2 w-full rounded-xl shadow-sm bg-gray-600 cursor-not-allowed"
                         />
                     </div>
                     <div className="mb-4">
@@ -335,7 +335,7 @@ const ProfilePage = () => {
                                 type={"button"}
                                 value={"2FA"}
                                 onClick={() => openModalMessageBox("Enable 2FA", "continue to get the mail with instructions", "", "info", "next")}
-                                className={"w-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"}
+                                className={"w-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
                             >Enable 2-Factor Authorization
                             </button>
                         ): (
@@ -343,7 +343,7 @@ const ProfilePage = () => {
                                 type={"button"}
                                 value={"2FA"}
                                 onClick={() => openModalMessageBox("Disable 2FA", "do you want to disable TOTP Verification?", "", "info", "yesno")}
-                                className={"w-full flex items-center justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"}
+                                className={"w-full flex items-center justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
                             >Disable 2-Factor Authorization
                             </button>
                         )}
@@ -351,7 +351,7 @@ const ProfilePage = () => {
                     <div className="mb-4">
                         <Link
                             href={"/password-reset-request"}
-                            className="w-full flex items-center justify-center bg-amber-500 hover:bg-amber-700 text-black font-bold py-3 px-4 rounded-md transition-colors shadow-md"
+                            className="w-full flex items-center justify-center bg-amber-500 hover:bg-amber-700 text-black font-bold py-3 px-4 rounded-xl transition-colors shadow-md"
                         >
                             Reset Your Password
                         </Link>
@@ -361,7 +361,7 @@ const ProfilePage = () => {
                     type="submit"
                     disabled={isLoading}
                     onClick={handleSubmit}
-                    className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-md mt-10"
+                    className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"
                 >
                     {isLoading ? "Updating..." : "Update Profile"}
                 </button>
