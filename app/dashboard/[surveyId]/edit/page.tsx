@@ -153,6 +153,7 @@ const EditSurveyPage = () => {
             const res = await authFetch(`/poll/survey/${params.surveyId}/questions`);
             if (!res.ok) {
                 const err = await res.json();
+                setUpdateError(err.message || "Failed to load questions")
                 return;
             }
             const data = await res.json();
@@ -203,8 +204,8 @@ const EditSurveyPage = () => {
             }
         } else {
             // Set dates to null if timeframe is disabled
-            updatePayload.start_date = null;
-            updatePayload.end_date = null;
+            updatePayload.start_date = "";
+            updatePayload.end_date = "";
         }
 
         try {
