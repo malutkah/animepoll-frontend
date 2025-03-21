@@ -31,11 +31,11 @@ export async function authFetch(endpoint: string, options: RequestInit = {}) {
         window.location.href = "/login";
         return Promise.reject("Unauthorized");
     }
-    if (!res.ok) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("expires_at");
-        window.location.href = "/login";
-        return Promise.reject("Unauthorized");
-    }
+    // if (!res.ok) {
+    //     localStorage.removeItem("token");
+    //     localStorage.removeItem("expires_at");
+    //     window.location.href = "/login";
+    //     return Promise.reject("Unauthorized");
+    // }
     return res;
 }
