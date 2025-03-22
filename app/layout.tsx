@@ -1,19 +1,20 @@
-import "./globals.css"
-import { Inter, Montserrat } from "next/font/google"
-import { ThemeProvider } from "next-themes"
-import Navbar from "@/app/components/Navbar"
-import { ToastProvider } from "@/app/components/ToastProvider"
-import { MessageProvider } from "@/app/components/MessageBoxExport"
-import MaintenanceGate from "@/app/components/MaintenanceGate"
+// app/layout.tsx
+import { Inter, Montserrat } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import Navbar from "@/app/components/Navbar";
+import { ToastProvider } from "@/app/components/ToastProvider";
+import { MessageProvider } from "@/app/components/MessageBoxExport";
+import MaintenanceGate from "@/app/components/MaintenanceGate";
 import Footer from "@/app/components/Footer";
+import ClientWrapper from "@/app/components/ClientWrapper";
+import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] })
-const mon = Montserrat({ weight: "400", subsets: ["latin"] })
+const mon = Montserrat({ weight: "400", subsets: ["latin"] });
 
 export const metadata = {
     title: "AnimePoll",
     description: "Your Voice in the Anime Community",
-}
+};
 
 export default function RootLayout({ children }) {
     return (
@@ -22,19 +23,21 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class">
             <MessageProvider>
                 <ToastProvider>
-                    <MaintenanceGate>
-                        <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
-                            <Navbar />
-                            <main className="container mx-auto px-4 py-8 flex-1">
-                                {children}
-                            </main>
-                            <Footer />
-                        </div>
-                    </MaintenanceGate>
+                    <ClientWrapper>
+                        <MaintenanceGate>
+                            <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+                                <Navbar />
+                                <main className="container mx-auto px-4 py-8 flex-1">
+                                    {children}
+                                </main>
+                                <Footer />
+                            </div>
+                        </MaintenanceGate>
+                    </ClientWrapper>
                 </ToastProvider>
             </MessageProvider>
         </ThemeProvider>
         </body>
         </html>
-    )
+    );
 }

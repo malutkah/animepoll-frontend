@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
-import { PollIcon, CommunityIcon, PersonalizationIcon } from "./Icons";
+import {PollIcon, CommunityIcon, PersonalizationIcon} from "./Icons";
+import useTranslation from '@/lib/useTranslation'
 
 interface FeatureCardProps {
     icon: React.ReactNode;
@@ -10,7 +11,7 @@ interface FeatureCardProps {
     description: string;
 }
 
-const FeatureCard = ({ icon, title, description }: FeatureCardProps) => {
+const FeatureCard = React.memo(({ icon, title, description }: FeatureCardProps) => {
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-transform duration-300 hover:scale-105">
             <div className="text-4xl mb-4 text-indigo-600 dark:text-indigo-400">{icon}</div>
@@ -18,10 +19,13 @@ const FeatureCard = ({ icon, title, description }: FeatureCardProps) => {
             <p className="text-gray-600 dark:text-gray-300">{description}</p>
         </div>
     );
-};
+});
+
+FeatureCard.displayName = 'FeatureCard';
 
 const LandingPage = () => {
     const [loggedIn, setLoggedIn] = useState(false);
+    const {t, locale} = useTranslation();
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -32,36 +36,49 @@ const LandingPage = () => {
 
     const isMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
 
+    const featureCards = useMemo(() => [
+        {
+            icon: <PollIcon />,
+            title: t('common.features.polls'),
+            description: t('common.features.pollsDesc')
+        },
+        {
+            icon: <CommunityIcon />,
+            title: t('common.features.community'),
+            description: t('common.features.communityDesc')
+        },
+        {
+            icon: <PersonalizationIcon />,
+            title: t('common.features.personalization'),
+            description: t('common.features.personalizationDesc')
+        }
+    ], [t]);
+
     return (
         <div className="text-center">
             {isMaintenance && (
                 <div className="bg-orange-300 p-4 mb-4">
                     <marquee className="text-3xl font-bold text-black">
-                        The website is currently under maintenance. Some features are temporarily unavailable.
+                        {locale === 'en'
+                            ? "The website is currently under maintenance. Some features are temporarily unavailable."
+                            : "Die Website wird derzeit gewartet. Einige Funktionen sind vorübergehend nicht verfügbar."}
                     </marquee>
                 </div>
             )}
             <h1 className="text-5xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-                Welcome to <span className="text-indigo-600 dark:text-indigo-400">AnimePoll</span>
+                {t('common.welcome')} <span className="text-indigo-600 dark:text-indigo-400">AnimePoll</span>
             </h1>
-            <p className="text-xl mb-12 text-gray-600 dark:text-gray-300">Your Voice in the Anime Community</p>
+            <p className="text-xl mb-12 text-gray-600 dark:text-gray-300">{t('common.subtitle')}</p>
 
             <div className="grid md:grid-cols-3 gap-8 mb-12">
-                <FeatureCard
-                    icon={<PollIcon />}
-                    title="Create & Participate in Polls"
-                    description="Engage with the community through interactive polls about your favorite anime series, characters, and more."
-                />
-                <FeatureCard
-                    icon={<CommunityIcon />}
-                    title="Join the Discussion"
-                    description="Share your opinions, discover new perspectives, and connect with fellow anime enthusiasts."
-                />
-                <FeatureCard
-                    icon={<PersonalizationIcon />}
-                    title="Personalized Experience"
-                    description="Get recommendations and discover new anime based on your poll participation and preferences."
-                />
+                {featureCards.map((card, index) => (
+                    <FeatureCard
+                        key={index}
+                        icon={card.icon}
+                        title={card.title}
+                        description={card.description}
+                    />
+                ))}
             </div>
 
             <div className="space-x-4">
@@ -69,7 +86,7 @@ const LandingPage = () => {
                     href={loggedIn ? "/dashboard" : "/signup"}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
-                    Get Started
+                    {t('common.getStarted')}
                 </Link>
                 <Link
                     href={loggedIn ? "/dashboard" : "/login"}

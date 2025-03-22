@@ -3,12 +3,14 @@
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import {usePathname, useRouter} from "next/navigation"
-import ThemeToggle from "./ThemeToggle"
+import LanguageSwitcher from './LanguageSwitcher';
+import useTranslation from '@/lib/useTranslation'
 import { Home, Search, User, LogOut, LogIn, UserPlus } from "lucide-react"
 
 const Navbar = () => {
     const [loggedIn, setLoggedIn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
+    const { t } = useTranslation();
     const router = useRouter()
     const pathname = usePathname()
     const logo = "/logo_120_transparent.png"
@@ -95,6 +97,7 @@ const Navbar = () => {
                         </Link>
                     </>
                 )}
+                <LanguageSwitcher />
                 {/* Optional: Uncomment to include theme toggle */}
                 {/* <ThemeToggle /> */}
             </div>
@@ -174,6 +177,7 @@ const Navbar = () => {
                                 </Link>
                             </>
                         )}
+                        <LanguageSwitcher />
                     </div>
                 )}
             </div>
