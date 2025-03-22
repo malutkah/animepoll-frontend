@@ -92,20 +92,20 @@ const LandingPage = () => {
                     href={loggedIn ? "/dashboard" : "/login"}
                     className="bg-pink-700 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
                 >
-                    Login
+                    {t('common.login')}
                 </Link>
                 <Link
                     href={"/prelaunch-signup"}
                     aria-disabled={true}
                     className="pointer-events-none bg-gray-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block disabled:bg-gray-600"
                 >
-                    Sign Up for Pre-Launch
+                    {t('common.signup_prelaunch')}
                 </Link>
                 <Link
                     href="/discover"
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 inline-block"
                 >
-                    Discover Polls
+                    {t('common.discover')}
                 </Link>
             </div>
         </div>

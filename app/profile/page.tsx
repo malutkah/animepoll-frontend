@@ -5,6 +5,7 @@ import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
 import Link from "next/link";
 import ModalBox from "@/app/components/ModalBox";
+import useTranslation from "@/lib/useTranslation";
 
 interface UserProfile {
     username: string;
@@ -23,6 +24,7 @@ interface Countries {
     region: string;
     subregion: string;
     emojiU: string;
+    translations: any;
 }
 
 const ProfilePage = () => {
@@ -32,6 +34,7 @@ const ProfilePage = () => {
     const [age, setAge] = useState<number | ''>('')
     const [gender, setGender] = useState('')
     const [region, setRegion] = useState('')
+    const [translations, setTranslations] = useState({})
     const [totpActivated, setTotpActivated] = useState('')
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
@@ -39,6 +42,8 @@ const ProfilePage = () => {
     const [countries, setCountries] = useState<Countries[]>([])
     const [profilePic, setProfilePic] = useState<string>("/profile-pic-empty.svg")
     const [openModalBox, setOpenModalBox] = useState<any>(undefined)
+
+    const { t, locale } = useTranslation();
 
     // Simple email validation state (for instant feedback)
     const [emailError, setEmailError] = useState("")
@@ -48,7 +53,7 @@ const ProfilePage = () => {
             const res = await authFetch("/user/me")
             if (!res.ok) {
                 const err = await res.json()
-                setError(err.message || "Failed to load profile")
+                setError(err.message || t('common.error.err_get_profile'))
                 return
             }
             const data = await res.json()
@@ -65,16 +70,16 @@ const ProfilePage = () => {
                 setProfilePic(data.profilePicture)
             }
         } catch (err) {
-            setError("Failed to load profile")
+            setError(t('common.errors.err_get_profile'))
         }
     }
 
     const fetchCountries = async () => {
         try {
-            const res = await authFetch("/user/countries?fields=name,iso3,emoji,region,subregion")
+            const res = await authFetch("/user/countries?fields=name,iso3,emoji,region,subregion,translations")
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load countries");
+                setError(err.message || t('common.errors.err_countries'));
                 return;
             }
             const data = await res.json();
@@ -122,7 +127,7 @@ const ProfilePage = () => {
         // Simple email regex check
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
-            setEmailError("Please enter a valid email address")
+            setEmailError(t('common.errors.err_invalid_email'))
         } else {
             setEmailError("")
         }
@@ -142,12 +147,12 @@ const ProfilePage = () => {
             })
             if (!res.ok) {
                 const err = await res.json()
-                setError(err.message || "Failed to update profile")
+                setError(err.message || t('common.errors.err_update_profile'))
                 return
             }
-            setSuccess("Profile updated successfully")
+            setSuccess(t('common.success.succ_update_profile'))
         } catch (err) {
-            setError("Failed to update profile")
+            setError(t('common.errors.err_update_profile'))
         } finally {
             setIsLoading(false)
         }
@@ -183,7 +188,7 @@ const ProfilePage = () => {
 
         } catch (err) {
             console.error("Error details:", err);
-            setError(err.message || String(err) || "An error occurred");
+            setError(err.message || String(err) || t('common.errors.err_occurred'));
             setIsLoading(false);
             setOpenModalBox(undefined);
         }
@@ -208,7 +213,7 @@ const ProfilePage = () => {
 
         } catch (err) {
             console.error("Error details:", err);
-            setError(err.message || String(err) || "An error occurred");
+            setError(err.message || String(err) || t('common.errors.err_occurred'));
             setIsLoading(false);
             setOpenModalBox(undefined);
         }
@@ -231,7 +236,7 @@ const ProfilePage = () => {
     return (
         <ProtectedRoute>
             <div className="max-w-3xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
+                <h1 className="text-3xl font-bold mb-6 text-center">{t('common.pg_profile.your_profile')}</h1>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 {success && <p className="text-green-500 mb-4">{success}</p>}
 
@@ -251,9 +256,9 @@ const ProfilePage = () => {
 
                 {/* Personal Information Section */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-8">
-                    <h2 className="text-2xl font-bold mb-4 border-b pb-2">Personal Information</h2>
+                    <h2 className="text-2xl font-bold mb-4 border-b pb-2">{t('common.pg_profile.personal_info')}</h2>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Username</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.username')}</label>
                         <input
                             type="text"
                             value={profile?.username || ""}
@@ -262,7 +267,7 @@ const ProfilePage = () => {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Email</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.email')}</label>
                         <input
                             type="email"
                             value={email}
@@ -276,7 +281,7 @@ const ProfilePage = () => {
                         {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
                     </div>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Country</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.country')}</label>
                         {countries.length > 0 ? (
                             <select
                                 value={country}
@@ -286,7 +291,7 @@ const ProfilePage = () => {
                                 <option value="">Select a country</option>
                                 {countries.map((c) => (
                                     <option key={c.iso3} value={c.name}>
-                                        {c.name}
+                                        {locale === 'de' ? c.translations.de : c.name}
                                     </option>
                                 ))}
                             </select>
@@ -295,7 +300,7 @@ const ProfilePage = () => {
                         )}
                     </div>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Age</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.age')}</label>
                         <input
                             type="number"
                             value={age}
@@ -304,24 +309,24 @@ const ProfilePage = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-lg font-semibold mb-1">Gender</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.gender')}</label>
                         <select
                             value={gender}
                             onChange={(e) => setGender(e.target.value)}
                             className="border p-2 w-full rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                         >
-                            <option value={"m"}>Male</option>
-                            <option value={"f"}>Female</option>
-                            <option value={"d"}>Diverse</option>
+                            <option value={"m"}>{t('common.pg_profile.male')}</option>
+                            <option value={"f"}>{t('common.pg_profile.female')}</option>
+                            <option value={"d"}>{t('common.pg_profile.diverse')}</option>
                         </select>
                     </div>
                 </div>
 
                 {/* Account Settings Section */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                    <h2 className="text-2xl font-bold mb-4 border-b pb-2">Account Settings</h2>
+                    <h2 className="text-2xl font-bold mb-4 border-b pb-2">{t('common.pg_profile.account_settings')}</h2>
                     <div className="mb-4">
-                        <label className="block text-lg font-semibold mb-1">Region</label>
+                        <label className="block text-lg font-semibold mb-1">{t('common.pg_profile.region')}</label>
                         <input
                             type="text"
                             value={region}
@@ -336,7 +341,7 @@ const ProfilePage = () => {
                                 value={"2FA"}
                                 onClick={() => openModalMessageBox("Enable 2FA", "continue to get the mail with instructions", "", "info", "next")}
                                 className={"w-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
-                            >Enable 2-Factor Authorization
+                            >{t('common.pg_profile.enable_2fa')}
                             </button>
                         ): (
                             <button
@@ -344,7 +349,7 @@ const ProfilePage = () => {
                                 value={"2FA"}
                                 onClick={() => openModalMessageBox("Disable 2FA", "do you want to disable TOTP Verification?", "", "info", "yesno")}
                                 className={"w-full flex items-center justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
-                            >Disable 2-Factor Authorization
+                            >{t('common.pg_profile.disable_2fa')}
                             </button>
                         )}
                     </div>
@@ -353,7 +358,7 @@ const ProfilePage = () => {
                             href={"/password-reset-request"}
                             className="w-full flex items-center justify-center bg-amber-500 hover:bg-amber-700 text-black font-bold py-3 px-4 rounded-xl transition-colors shadow-md"
                         >
-                            Reset Your Password
+                            {t('common.pg_profile.reset_password')}
                         </Link>
                     </div>
                 </div>
@@ -363,7 +368,7 @@ const ProfilePage = () => {
                     onClick={handleSubmit}
                     className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"
                 >
-                    {isLoading ? "Updating..." : "Update Profile"}
+                    {isLoading ? t('common.pg_profile.updating_profile') : t('common.pg_profile.update_profile')}
                 </button>
             </div>
             {openModalBox && (

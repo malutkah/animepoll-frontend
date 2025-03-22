@@ -10,6 +10,7 @@ import DynamicOptionsInput from "@/app/components/DynamicOptionsInput";
 import QuestionModal from "@/app/components/QuestionModal";
 import {InfoIcon, ClockIcon, Calendar} from "lucide-react";
 import DateTimePicker from "@/app/components/DateTimePicker";
+import useTranslation from "@/lib/useTranslation";
 
 interface Survey {
     id: string;
@@ -80,6 +81,8 @@ const EditSurveyPage = () => {
     const [genreId, setGenreId] = useState("");
     const [genre, setGenre] = useState("");
 
+    const {t} = useTranslation();
+
     const disabledButtonClasses = "disabled:bg-gray-600 pointer-events-none";
 
     const fetchAnimeGenres = async () => {
@@ -87,13 +90,13 @@ const EditSurveyPage = () => {
             const res = await fetch(baseURL() + "/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
-                setUpdateError(err.message || "Failed to load genres");
+                setUpdateError(err.message || t("common.errors.err_get_genres"));
                 return;
             }
             const data = await res.json();
             setGenres(data);
         } catch (err) {
-            setUpdateError("Failed getting genres");
+            setUpdateError(t("common.errors.err_get_genres"));
             console.error(err);
         }
     };
@@ -124,7 +127,7 @@ const EditSurveyPage = () => {
             const res = await authFetch(`/poll/survey/${params.surveyId}`);
             if (!res.ok) {
                 const err = await res.json();
-                setUpdateError(err.message || "Failed to load survey");
+                setUpdateError(err.message || t("common.errors.err_survey_load"));
                 return;
             }
             const data = await res.json();
@@ -144,7 +147,7 @@ const EditSurveyPage = () => {
                 setEndDate(new Date(data.end_date));
             }
         } catch (err) {
-            setUpdateError("Failed to load survey");
+            setUpdateError(t("common.errors.err_survey_load"));
         }
     };
 
@@ -153,7 +156,7 @@ const EditSurveyPage = () => {
             const res = await authFetch(`/poll/survey/${params.surveyId}/questions`);
             if (!res.ok) {
                 const err = await res.json();
-                setUpdateError(err.message || "Failed to load questions")
+                setUpdateError(err.message || t("common.errors.err_questions_load"))
                 return;
             }
             const data = await res.json();
@@ -216,11 +219,11 @@ const EditSurveyPage = () => {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setUpdateError(err.message || "Failed to update survey");
+                setUpdateError(err.message || t("common.errors.err_survey_update"));
                 showMessage({
                     type: 'error',
-                    title: 'Update Failed',
-                    message: err.message || "Failed to update survey",
+                    title: t("common.errors.err_occurred"),
+                    message: err.message || t("common.errors.err_survey_update"),
                     showIcon: true,
                     autoClose: true
                 });
@@ -229,17 +232,17 @@ const EditSurveyPage = () => {
 
             showMessage({
                 type: 'success',
-                title: 'Survey Updated',
-                message: 'Survey was updated successfully',
+                title: t("common.success.succ_survey_updated"),
+                message: t("common.success.succ_survey_updated"),
                 showIcon: true,
                 autoClose: true
             });
         } catch (err) {
-            setUpdateError("Failed to update survey");
+            setUpdateError(t("common.errors.err_survey_update"));
             showMessage({
                 type: 'error',
-                title: 'Update Failed',
-                message: "An unexpected error occurred. Please try again.",
+                title: t("common.errors.err_occurred"),
+                message: t("common.errors.err_survey_update"),
                 showIcon: true,
                 autoClose: true
             });
@@ -255,10 +258,10 @@ const EditSurveyPage = () => {
         setQuestionError("");
 
         if (!questionText.trim()) {
-            setQuestionError("Question text must be filled.");
+            setQuestionError(t("common.errors.err_empty_fields"));
             showMessage({
                 type: 'warning',
-                message: "Question text must be filled.",
+                message: t("common.errors.err_empty_fields"),
                 showIcon: true,
                 autoClose: true
             });
@@ -270,10 +273,10 @@ const EditSurveyPage = () => {
         if (questionType === "multiple-choice") {
             possibleAnswersArray = options.filter(opt => opt.trim() !== "");
             if (possibleAnswersArray.length === 0) {
-                setQuestionError("Please provide at least one option for multiple-choice questions.");
+                setQuestionError(t("common.survey.no_options"));
                 showMessage({
                     type: 'warning',
-                    message: "Please provide at least one option for multiple-choice questions.",
+                    message: t("common.survey.no_options"),
                     showIcon: true,
                     autoClose: true
                 });
@@ -283,10 +286,10 @@ const EditSurveyPage = () => {
         } else if (questionType === "rating") {
             // Validate rating settings
             if (!ratingMinText.trim() || !ratingMaxText.trim()) {
-                setQuestionError("Please provide labels for both the minimum and maximum rating.");
+                setQuestionError(t("common.errors.err_empty_fields"));
                 showMessage({
                     type: 'warning',
-                    message: "Please provide labels for both the minimum and maximum rating.",
+                    message: t("common.errors.err_empty_fields"),
                     showIcon: true,
                     autoClose: true
                 });
@@ -314,11 +317,11 @@ const EditSurveyPage = () => {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setQuestionError(err.message || "Failed to create question");
+                setQuestionError(err.message || t("common.errors.err_question_create"));
                 showMessage({
                     type: 'error',
-                    title: 'Question Creation Failed',
-                    message: err.message || "Failed to create question",
+                    title: t("common.errors.err_occurred"),
+                    message: err.message || t("common.errors.err_question_create"),
                     showIcon: true,
                     autoClose: true
                 });
@@ -327,8 +330,8 @@ const EditSurveyPage = () => {
 
             showMessage({
                 type: 'success',
-                title: 'Question Created',
-                message: 'Question was created successfully',
+                title: t("common.success.succ_question_created"),
+                message: t("common.success.succ_question_created"),
                 showIcon: true,
                 autoClose: true
             });
@@ -340,15 +343,15 @@ const EditSurveyPage = () => {
             setRatingRange(5);
             setRatingDisplayType("star");
             setRatingAllowHalfSteps(false);
-            setRatingMinText("Very bad");
-            setRatingMaxText("Perfect");
+            setRatingMinText(t("common.survey.min_label"));
+            setRatingMaxText(t("common.survey.max_label"));
             fetchQuestions();
         } catch (err) {
-            setQuestionError("Failed to create question");
+            setQuestionError(t("common.errors.err_question_create"));
             showMessage({
                 type: 'error',
-                title: 'Question Creation Failed',
-                message: "An unexpected error occurred. Please try again.",
+                title: t("common.errors.err_occurred"),
+                message: t("common.errors.err_question_create"),
                 showIcon: true,
                 autoClose: true
             });
@@ -361,8 +364,8 @@ const EditSurveyPage = () => {
     const handleDeleteQuestion = async (questionId: string) => {
         const messageId = showMessage({
             type: 'question',
-            title: 'Delete Question',
-            message: 'Are you sure you want to delete this question? This action cannot be undone.',
+            title: t("common.delete"),
+            message: t("common.msg_confirm.delete_question"),
             onConfirm: async () => {
                 try {
                     const res = await authFetch(`/poll/question/${questionId}`, {
@@ -372,16 +375,16 @@ const EditSurveyPage = () => {
                         const err = await res.json();
                         showMessage({
                             type: 'error',
-                            title: 'Deletion Failed',
-                            message: err.message || "Failed to delete question",
+                            title: t("common.errors.err_deletion"),
+                            message: err.message || t("common.errors.err_occurred"),
                             showIcon: true,
                             autoClose: true
                         });
                     } else {
                         showMessage({
                             type: 'success',
-                            title: 'Question Deleted',
-                            message: 'Question was successfully deleted',
+                            title: t("common.success.succ_question_deleted"),
+                            message: t("common.success.succ_question_deleted"),
                             showIcon: true,
                             autoClose: true
                         });
@@ -391,8 +394,8 @@ const EditSurveyPage = () => {
                 } catch (err) {
                     showMessage({
                         type: 'error',
-                        title: 'Deletion Failed',
-                        message: "An unexpected error occurred. Please try again.",
+                        title: t("common.errors.err_deletion"),
+                        message: t("common.errors.err_occurred"),
                         showIcon: true,
                         autoClose: true
                     });
@@ -403,8 +406,8 @@ const EditSurveyPage = () => {
             onCancel: () => {
                 setActiveContextMenu(null);
             },
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
+            confirmText: t("common.delete"),
+            cancelText: t("common.cancel"),
             showIcon: true,
             showCloseButton: false,
         });
@@ -421,8 +424,8 @@ const EditSurveyPage = () => {
             if (endDate.getTime() <= startDate.getTime()) {
                 showMessage({
                     type: 'error',
-                    title: 'Invalid Date Range',
-                    message: 'End date must be after start date',
+                    title: t("common.errors.err_occurred"),
+                    message: t("common.timeframe.date_range_error"),
                     showIcon: true,
                     autoClose: true
                 });
@@ -455,15 +458,15 @@ const EditSurveyPage = () => {
                 {/* Survey Update Form */}
                 <div>
                     <button onClick={() => router.back()} className="mb-4 text-blue-500">
-                        Back
+                        {t("common.back")}
                     </button>
-                    <h1 className="text-3xl font-bold mb-4">Edit Survey</h1>
+                    <h1 className="text-3xl font-bold mb-4">{t("common.survey.edit_survey")}</h1>
                     {updateError && <p className="text-red-500">{updateError}</p>}
                     {survey ? (
                         <form onSubmit={handleSurveyUpdate}
                               className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
                             <div>
-                                <label className="block font-medium">Title</label>
+                                <label className="block font-medium">{t("common.survey.title")}</label>
                                 <input
                                     type="text"
                                     value={title}
@@ -473,7 +476,7 @@ const EditSurveyPage = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block font-medium">Description</label>
+                                <label className="block font-medium">{t("common.survey.description")}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
@@ -482,7 +485,7 @@ const EditSurveyPage = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block font-medium">Genre</label>
+                                <label className="block font-medium">{t("common.survey.genre")}</label>
                                 {genres && genres.length > 0 ? (
                                     <select
                                         value={genre}
@@ -490,7 +493,7 @@ const EditSurveyPage = () => {
                                         className="border p-2 w-full rounded"
                                         required
                                     >
-                                        <option value={""}>Select a Genre</option>
+                                        <option value={""}>{t("common.survey.select_genre")}</option>
                                         {genres.map((g) => (
                                             <option key={g.id} value={g.name}>
                                                 {g.name}
@@ -498,7 +501,7 @@ const EditSurveyPage = () => {
                                         ))}
                                     </select>
                                 ) : (
-                                    <p>Loading Genres</p>
+                                    <p>{t("common.loading")}</p>
                                 )}
                             </div>
 
@@ -507,7 +510,7 @@ const EditSurveyPage = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <ClockIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                                        <label className="text-lg font-medium">Survey Timeframe</label>
+                                        <label className="text-lg font-medium">{t("common.timeframe.survey_timeframe")}</label>
                                     </div>
                                     <div className="flex items-center">
                                         <label className="relative inline-flex items-center cursor-pointer">
@@ -519,7 +522,7 @@ const EditSurveyPage = () => {
                                             />
                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
                                             <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                                {enableTimeframe ? 'Enabled' : 'Disabled'}
+                                                {enableTimeframe ? t("common.timeframe.enabled") : t("common.timeframe.disabled")}
                                             </span>
                                         </label>
                                     </div>
@@ -528,38 +531,38 @@ const EditSurveyPage = () => {
                                 {enableTimeframe && (
                                     <div className="space-y-4 mt-4 bg-white dark:bg-gray-800 p-4 rounded-lg">
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            Set a specific time period when this survey will be available for responses.
+                                            {t("common.timeframe.timeframe_description")}
                                         </p>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block font-medium mb-2 flex items-center gap-1">
                                                     <Calendar className="h-4 w-4" />
-                                                    Start Date & Time
+                                                    {t("common.timeframe.start_date")}
                                                 </label>
                                                 <DateTimePicker
                                                     value={startDate}
                                                     onChange={setStartDate}
                                                     minDate={minDate}
-                                                    placeholder="Select start date and time"
+                                                    placeholder={t("common.timeframe.select_start")}
                                                 />
                                             </div>
 
                                             <div>
                                                 <label className="block font-medium mb-2 flex items-center gap-1">
                                                     <Calendar className="h-4 w-4" />
-                                                    End Date & Time
+                                                    {t("common.timeframe.end_date")}
                                                 </label>
                                                 <DateTimePicker
                                                     value={endDate}
                                                     onChange={setEndDate}
                                                     minDate={startDate || minDate}
-                                                    placeholder="Select end date and time"
+                                                    placeholder={t("common.timeframe.select_end")}
                                                     disabled={!startDate}
                                                 />
                                                 {!startDate && (
                                                     <p className="text-xs text-amber-500 mt-1">
-                                                        Please select a start date first
+                                                        {t("common.timeframe.select_first")}
                                                     </p>
                                                 )}
                                             </div>
@@ -568,7 +571,7 @@ const EditSurveyPage = () => {
                                         {startDate && endDate && (
                                             <div className="bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-lg">
                                                 <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                                                    Survey will be active from {startDate.toLocaleString()} to {endDate.toLocaleString()}
+                                                    {t("common.timeframe.active_period").replace('{0}', startDate.toLocaleString()).replace('{1}', endDate.toLocaleString())}
                                                 </p>
                                             </div>
                                         )}
@@ -577,19 +580,19 @@ const EditSurveyPage = () => {
                             </div>
 
                             <div>
-                                <label className="block font-medium">Visibility</label>
+                                <label className="block font-medium">{t("common.survey.visibility")}</label>
                                 <select
                                     value={visibility}
                                     onChange={(e) => checkVisibility(e.target.value)}
                                     className="border p-2 w-full rounded"
                                 >
-                                    <option value="public">Public</option>
-                                    <option value="private">Private</option>
+                                    <option value="public">{t("common.survey.public")}</option>
+                                    <option value="private">{t("common.survey.private")}</option>
                                 </select>
                                 {disableSurveyUpdate ? (
                                     <span className={"flex align-middle mt-4"}>
                                         <InfoIcon className={"text-orange-400 mr-4"}/>
-                                        <p className={"text-orange-400"}>You can set your survey public once it has at least one question</p>
+                                        <p className={"text-orange-400"}>{t("common.survey.cant_set_public")}</p>
                                     </span>
                                 ) : null}
                             </div>
@@ -597,7 +600,7 @@ const EditSurveyPage = () => {
                             {enableTimeframe && (!startDate || !endDate) && (
                                 <div className="flex items-center text-amber-600 dark:text-amber-400 mt-2">
                                     <InfoIcon className="h-5 w-5 mr-2" />
-                                    <p>Please set both start and end dates to enable timeframe</p>
+                                    <p>{t("common.timeframe.both_dates_required")}</p>
                                 </div>
                             )}
 
@@ -615,22 +618,22 @@ const EditSurveyPage = () => {
                                     }
                                 }}
                             >
-                                {updateLoading ? "Updating..." : "Update Survey"}
+                                {updateLoading ? t("common.updating") : t("common.survey.update_survey")}
                             </button>
                         </form>
                     ) : (
-                        <p>Loading survey...</p>
+                        <p>{t("common.loading")}</p>
                     )}
                 </div>
 
                 {/* Question Creation Form */}
                 <div className="border-t pt-8">
-                    <h2 className="text-2xl font-bold mb-4">Create New Question</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t("common.survey.create_question")}</h2>
                     {questionError && <p className="text-red-500">{questionError}</p>}
                     <form onSubmit={handleQuestionCreate}
                           className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
                         <div>
-                            <label className="block font-medium">Question Text</label>
+                            <label className="block font-medium">{t("common.survey.question_text")}</label>
                             <input
                                 type="text"
                                 value={questionText}
@@ -643,15 +646,15 @@ const EditSurveyPage = () => {
                             />
                         </div>
                         <div>
-                            <label className="block font-medium">Question Type</label>
+                            <label className="block font-medium">{t("common.survey.question_type")}</label>
                             <select
                                 value={questionType}
                                 onChange={(e) => setQuestionType(e.target.value)}
                                 className="border p-2 w-full rounded"
                             >
-                                <option value="multiple-choice">Multiple Choice</option>
-                                <option value="text">Text</option>
-                                <option value="rating">Rating</option>
+                                <option value="multiple-choice">{t("common.survey.multiple_choice")}</option>
+                                <option value="text">{t("common.survey.text")}</option>
+                                <option value="rating">{t("common.survey.rating")}</option>
                             </select>
                         </div>
                         {questionType === "multiple-choice" && (
@@ -660,7 +663,7 @@ const EditSurveyPage = () => {
                         {questionType === "rating" && (
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block font-medium">Rating Range</label>
+                                    <label className="block font-medium">{t("common.survey.rating_range")}</label>
                                     <select
                                         value={ratingRange}
                                         onChange={(e) => setRatingRange(Number(e.target.value))}
@@ -671,15 +674,15 @@ const EditSurveyPage = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block font-medium">Display Type</label>
+                                    <label className="block font-medium">{t("common.survey.display_type")}</label>
                                     <select
                                         value={ratingDisplayType}
                                         onChange={(e) => setRatingDisplayType(e.target.value)}
                                         className="border p-2 w-full rounded"
                                     >
-                                        <option value="star">Star Rating</option>
-                                        <option value="slider">Slider</option>
-                                        <option value="radio">Radio Buttons</option>
+                                        <option value="star">{t("common.survey.star_rating")}</option>
+                                        <option value="slider">{t("common.survey.slider")}</option>
+                                        <option value="radio">{t("common.survey.radio_buttons")}</option>
                                     </select>
                                 </div>
                                 {(ratingDisplayType === "star" || ratingDisplayType === "slider") && (
@@ -690,11 +693,11 @@ const EditSurveyPage = () => {
                                             onChange={(e) => setRatingAllowHalfSteps(e.target.checked)}
                                             className="form-checkbox h-5 w-5 text-indigo-600"
                                         />
-                                        <span className="text-sm">Allow Half Steps</span>
+                                        <span className="text-sm">{t("common.survey.allow_half_steps")}</span>
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block font-medium">Minimum Label</label>
+                                    <label className="block font-medium">{t("common.survey.min_label")}</label>
                                     <input
                                         type="text"
                                         value={ratingMinText}
@@ -703,7 +706,7 @@ const EditSurveyPage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block font-medium">Maximum Label</label>
+                                    <label className="block font-medium">{t("common.survey.max_label")}</label>
                                     <input
                                         type="text"
                                         value={ratingMaxText}
@@ -718,7 +721,7 @@ const EditSurveyPage = () => {
                             disabled={questionLoading || disableQuestion}
                             className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded disabled:bg-gray-600 ${disableQuestion ? disabledButtonClasses : ""}`}
                         >
-                            {questionLoading ? "Creating..." : "Create Question"}
+                            {questionLoading ? t("common.creating") : t("common.survey.create_question")}
                         </button>
                     </form>
                 </div>
@@ -726,10 +729,10 @@ const EditSurveyPage = () => {
                 {/* Existing Questions List */}
                 <div className="border-t pt-8">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">Existing Questions</h2>
+                        <h2 className="text-2xl font-bold">{t("common.survey.questions")}</h2>
                         <div className="text-sm bg-indigo-100 dark:bg-indigo-900/30 py-1 px-3 rounded-full">
                             <span className="font-semibold text-indigo-700 dark:text-indigo-300">
-                                {questions?.length || 0} Questions
+                                {t("common.survey.question_count").replace('{0}',questions.length.toString())}
                             </span>
                         </div>
                     </div>
@@ -741,9 +744,9 @@ const EditSurveyPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 mb-2">No questions have been added yet.</p>
+                            <p className="text-gray-600 dark:text-gray-300 mb-2">{t("common.survey.no_questions")}</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Create your first question using the form above.
+                                {t("common.survey.create_first_question")}
                             </p>
                         </div>
                     ) : (
@@ -759,15 +762,15 @@ const EditSurveyPage = () => {
                                                 {index + 1}
                                             </span>
                                             <span className="font-medium text-gray-700 dark:text-gray-100">
-                                                {question.type === "multiple-choice" ? "Multiple Choice" :
-                                                    question.type === "rating" ? "Rating" : "Text Response"}
+                                                {question.type === "multiple-choice" ? t("common.survey.multiple_choice") :
+                                                    question.type === "rating" ? t("common.survey.rating") : t("common.survey.text")}
                                             </span>
                                         </div>
                                         <div className="flex space-x-1">
                                             <button
                                                 onClick={() => openEditModal(question)}
                                                 className="p-1.5 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md"
-                                                title="Edit Question"
+                                                title={t("common.edit")}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -776,7 +779,7 @@ const EditSurveyPage = () => {
                                             <button
                                                 onClick={() => handleDeleteQuestion(question.id)}
                                                 className="p-1.5 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md"
-                                                title="Delete Question"
+                                                title={t("common.delete")}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -792,7 +795,7 @@ const EditSurveyPage = () => {
 
                                         {question.type === "multiple-choice" && (
                                             <div className="space-y-2 mt-3">
-                                                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Options:</p>
+                                                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">{t("common.survey.possible_answers")}:</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {question.possible_answers.map((option: string, i: number) => (
                                                         <span
@@ -808,32 +811,36 @@ const EditSurveyPage = () => {
 
                                         {question.type === "rating" && (
                                             <div className="space-y-2 mt-3">
-                                                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Rating Configuration:</p>
+                                                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">{t("common.survey.rating_config")}:</p>
                                                 {(() => {
                                                     try {
                                                         const config = JSON.parse(JSON.parse(question.possible_answers)[0]);
                                                         return (
                                                             <div className="grid grid-cols-2 gap-2 text-sm">
                                                                 <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                                    <span className="block text-gray-500 dark:text-gray-400">Type:</span>
-                                                                    <span className="font-medium text-gray-800 dark:text-gray-200 capitalize">{config.displayType}</span>
+                                                                    <span className="block text-gray-500 dark:text-gray-400">{t("common.survey.display_type")}:</span>
+                                                                    <span className="font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                        {config.displayType === "star" ? t("common.survey.star_rating") :
+                                                                            config.displayType === "slider" ? t("common.survey.slider") :
+                                                                                t("common.survey.radio_buttons")}
+                                                                    </span>
                                                                 </div>
                                                                 <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                                    <span className="block text-gray-500 dark:text-gray-400">Range:</span>
+                                                                    <span className="block text-gray-500 dark:text-gray-400">{t("common.survey.rating_range")}:</span>
                                                                     <span className="font-medium text-gray-800 dark:text-gray-200">1-{config.range}</span>
                                                                 </div>
                                                                 <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                                    <span className="block text-gray-500 dark:text-gray-400">Min Label:</span>
+                                                                    <span className="block text-gray-500 dark:text-gray-400">{t("common.survey.min_label")}:</span>
                                                                     <span className="font-medium text-gray-800 dark:text-gray-200">{config.minText}</span>
                                                                 </div>
                                                                 <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                                    <span className="block text-gray-500 dark:text-gray-400">Max Label:</span>
+                                                                    <span className="block text-gray-500 dark:text-gray-400">{t("common.survey.max_label")}:</span>
                                                                     <span className="font-medium text-gray-800 dark:text-gray-200">{config.maxText}</span>
                                                                 </div>
                                                             </div>
                                                         );
                                                     } catch (e) {
-                                                        return <p className="text-sm text-red-500">Error parsing rating configuration</p>;
+                                                        return <p className="text-sm text-red-500">{t("common.errors.err_parsing_config")}</p>;
                                                     }
                                                 })()}
                                             </div>
@@ -842,7 +849,7 @@ const EditSurveyPage = () => {
                                         {question.type === "text" && (
                                             <div className="mt-3 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                                                 <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                                                    This question allows free-form text responses from participants.
+                                                    {t("common.survey.text_response_description")}
                                                 </p>
                                             </div>
                                         )}
@@ -861,7 +868,7 @@ const EditSurveyPage = () => {
                     onSave={() => {
                         setEditingQuestion(null)
                         fetchQuestions()
-                        addToast("Question updated successfully", "success")
+                        addToast(t("common.success.succ_question_updated"), "success")
                     }}
                 />
             )}

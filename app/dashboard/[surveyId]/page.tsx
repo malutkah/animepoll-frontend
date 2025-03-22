@@ -7,6 +7,7 @@ import {authFetch, baseURL, wsURL} from "@/lib/api"
 import BarChart from "@/app/components/BarChart";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
+import useTranslation from "@/lib/useTranslation";
 
 const SurveyDetailPage = () => {
     const params = useParams() as { surveyId: string }
@@ -17,6 +18,8 @@ const SurveyDetailPage = () => {
     const [aggregatedResults, setAggregatedResults] = useState<{
         [key: string]: AggregatedQuestionResult;
     }>({});
+
+    const {t} = useTranslation();
 
     const [genres, setGenres] = useState<{ id: string; name: string }[]>([]);
     const [genre, setGenre] = useState("");
@@ -123,7 +126,7 @@ const SurveyDetailPage = () => {
             const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/results/public`);
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load results");
+                setError(err.message || t('common.errors.err_results_load'));
                 return;
             }
             const data: AggregatedSurveyResult = await res.json();
@@ -144,7 +147,7 @@ const SurveyDetailPage = () => {
             }
         } catch (err) {
             console.error(err);
-            setError("Failed to load results");
+            setError(t('common.errors.err_results_load'));
         }
     };
 
@@ -172,7 +175,7 @@ const SurveyDetailPage = () => {
     return (
         <ProtectedRoute>
             <div className={"space-y-8"}>
-                <button onClick={() => router.back()} className="mb-4 text-blue-500">Back</button>
+                <button onClick={() => router.back()} className="mb-4 text-blue-500">{t('common.back')}</button>
                 {error && <p className="text-red-500">{error}</p>}
                 {survey ? (
                     <div
@@ -182,10 +185,10 @@ const SurveyDetailPage = () => {
                         </h1>
                         <p className="text-white text-lg mb-2">{survey.description}</p>
                         {genre && <p className="text-white text-base">Genre: {genre}</p>}
-                        <p className="text-white text-lg mb-2">Total Answers: {aggregatedResultsArray.reduce((n, {response_count}) => n + response_count, 0)}</p>
+                        <p className="text-white text-lg mb-2">{t('common.survey.answer_count')}: {aggregatedResultsArray.reduce((n, {response_count}) => n + response_count, 0)}</p>
                     </div>
                 ) : (
-                    <p>Loading survey details...</p>
+                    <p>{t('common.loading')}</p>
                 )}
 
                 {/* Toggle Button Group */}
@@ -194,7 +197,7 @@ const SurveyDetailPage = () => {
                         onClick={() => setViewMode("questions")}
                         className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                             viewMode === "questions" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                        }`}>Answer Survey
+                        }`}>{t('common.survey.questions')}
                     </button>
 
                     <button
@@ -204,24 +207,24 @@ const SurveyDetailPage = () => {
                         }}
                         className={`text-lg px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ${
                             viewMode === "results" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                        }`}>View Results
+                        }`}>{t('common.survey.view_results')}
                     </button>
 
                 </div>
 
                 {viewMode === "questions" ? (
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideInLeft">
-                        <h2 className="text-2xl font-semibold mb-2"> Questions </h2>
+                        <h2 className="text-2xl font-semibold mb-2"> {t('common.survey.questions')} </h2>
                         {!questions || questions.length === 0 ? (
-                            <p>No questions found.</p>
+                            <p>{t('common.survey.no_questions')}</p>
                         ) : (
                             <ul className="mb-4">
                                 {questions && questions.map((q) => (
                                     <li key={q.id} className="border p-2 mb-2 rounded-xl">
-                                        <p className="font-medium">Question: {q.survey_text}</p>
-                                        <p className="font-medium">Type: {q.type === 'multiple-choice' ? "Multiple Choice" : q.type === 'text' ? "Text" : "Rating"}</p>
-                                        <p className="font-medium">{q.type === 'multiple-choice' ? `Possible Answers: ${q.possible_answers.join(' ,')}` :
-                                            q.type === 'rating' ? `Answer Type: ${JSON.parse(JSON.parse(q.possible_answers)).displayType}` : ''}</p>
+                                        <p className="font-medium">{t('common.question')}: {q.survey_text}</p>
+                                        <p className="font-medium">{t('common.survey.question_type')}: {q.type === 'multiple-choice' ? "Multiple Choice" : q.type === 'text' ? "Text" : "Rating"}</p>
+                                        <p className="font-medium">{q.type === 'multiple-choice' ? `${t('common.survey.possible_answers')}: ${q.possible_answers.join(' ,')}` :
+                                            q.type === 'rating' ? `${t('common.survey.answer_type')}: ${JSON.parse(JSON.parse(q.possible_answers)).displayType}` : ''}</p>
 
                                     </li>
                                 ))}
@@ -234,7 +237,7 @@ const SurveyDetailPage = () => {
                         {totalResults > 0 && (
                             <div className="mb-6 flex justify-between items-center">
                                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                    Question {currentResultIndex + 1} of {totalResults}
+                                    {t('common.question')} {currentResultIndex + 1} {t('common.of')} {totalResults}
                                 </p>
                                 <div className="space-x-3">
                                     <button
@@ -242,7 +245,7 @@ const SurveyDetailPage = () => {
                                         disabled={currentResultIndex === 0}
                                         className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                     >
-                                        Previous
+                                        {t('common.previous')}
                                     </button>
                                     <button
                                         onClick={() =>
@@ -253,13 +256,13 @@ const SurveyDetailPage = () => {
                                         disabled={currentResultIndex === totalResults - 1}
                                         className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                     >
-                                        Next
+                                        {t('common.next')}
                                     </button>
                                 </div>
                             </div>
                         )}
                         {totalResults === 0 ? (
-                            <p className="text-gray-800 dark:text-gray-100">No aggregated results yet...</p>
+                            <p className="text-gray-800 dark:text-gray-100">{t('common.surveys.no_results')}</p>
                         ) : (
                             (() => {
                                 const aggResult = aggregatedResultsArray[currentResultIndex];
@@ -267,7 +270,7 @@ const SurveyDetailPage = () => {
                                     return (
                                         <div className="mb-6">
                                             <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-                                               Question: {aggResult.question_text}
+                                                {t('common.question')}: {aggResult.question_text}
                                             </h3>
                                             {aggResult.options ? (
                                                 <BarChart
@@ -286,12 +289,10 @@ const SurveyDetailPage = () => {
                                     return (
                                         <div className="mb-6">
                                             <h3 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-                                                Question: {aggResult.question_text}
+                                                {t('common.question')}: {aggResult.question_text}
                                             </h3>
                                             <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">
-                                                Average
-                                                Rating: {aggResult.average_rating ? aggResult.average_rating.toFixed(1) : "N/A"} /
-                                                5
+                                                {t('common.survey.average_rating').replace('{0}', aggResult.average_rating ? aggResult.average_rating.toFixed(1) : "N/A").replace('{1}', '5')}
                                             </p>
                                             {aggResult.distribution ? (
                                                 <RatingDistributionChart
@@ -299,8 +300,7 @@ const SurveyDetailPage = () => {
                                                     distribution={aggResult.distribution}
                                                 />
                                             ) : (
-                                                <p className="text-gray-800 dark:text-gray-100">No distribution
-                                                    data.</p>
+                                                <p className="text-gray-800 dark:text-gray-100">{t('common.no_distribution')}</p>
                                             )}
                                         </div>
                                     );

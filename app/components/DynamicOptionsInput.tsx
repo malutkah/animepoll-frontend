@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, memo } from "react"
+import useTranslation from "@/lib/useTranslation";
 
 interface DynamicOptionsInputProps {
     options: string[]
@@ -9,6 +10,9 @@ interface DynamicOptionsInputProps {
 }
 
 const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOptionsInputProps) => {
+    // Get translation function
+    const {t} = useTranslation();
+
     // Memoize event handlers to prevent unnecessary re-renders
     const handleOptionChange = useCallback((index: number, value: string) => {
         const newOptions = [...options]
@@ -30,7 +34,7 @@ const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOpti
 
     return (
         <div>
-            <label className="block font-medium">Options</label>
+            <label className="block font-medium">{t("common.survey.possible_answers")}</label>
             {options.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2 mt-2">
                     <input
@@ -38,15 +42,15 @@ const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOpti
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         className="flex-1 p-2 border rounded-xl"
-                        placeholder={`Option ${index + 1}`}
+                        placeholder={t("common.survey.option_placeholder").replace('{0}', (index + 1).toString())}
                     />
                     <button
                         type="button"
                         onClick={() => handleRemoveOption(index)}
                         className="text-red-500"
-                        aria-label={`Remove option ${index + 1}`}
+                        aria-label={t("common.survey.remove_option_aria").replace('{0}', (index + 1).toString())}
                     >
-                        Remove
+                        {t("common.survey.remove_option")}
                     </button>
                 </div>
             ))}
@@ -56,10 +60,10 @@ const DynamicOptionsInput = memo(({ options, onChange, maxOptions }: DynamicOpti
                 className={`mt-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-xl ${isMaxOptionsReached ? "opacity-50 cursor-not-allowed" : ""}`}
                 disabled={isMaxOptionsReached}
             >
-                Add Option
+                {t("common.survey.add_option")}
             </button>
             {isMaxOptionsReached && (
-                <p className="text-sm text-gray-500">Maximum of {maxOptions} options reached.</p>
+                <p className="text-sm text-gray-500">{t("common.survey.max_options_reached").replace('{0}', maxOptions?.toString())}</p>
             )}
             {/*
             Additional ideas for question types:

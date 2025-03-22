@@ -55,28 +55,28 @@ const Navbar = () => {
                             className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-500"
                         >
                             <Search className="h-5 w-5" />
-                            <span>Discover Polls</span>
+                            <span>{t('common.discover')}</span>
                         </Link>
                         <Link
                             href="/dashboard"
                             className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-sky-500"
                         >
                             <Home className="h-5 w-5" />
-                            <span>Dashboard</span>
+                            <span>{t('common.dashboard')}</span>
                         </Link>
                         <Link
                             href="/profile"
                             className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 dark:hover:text-emerald-400"
                         >
                             <User className="h-5 w-5" />
-                            <span>Profile</span>
+                            <span>{t('common.profile')}</span>
                         </Link>
                         <button
                             onClick={handleLogout}
                             className="flex items-center space-x-1 text-red-400 "
                         >
                             <LogOut className="h-5 w-5" />
-                            <span>Logout</span>
+                            <span>{t('common.logout')}</span>
                         </button>
                     </>
                 ) : (
@@ -86,14 +86,14 @@ const Navbar = () => {
                             className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                         >
                             <LogIn className="h-5 w-5" />
-                            <span>Login</span>
+                            <span>{t('common.login')}</span>
                         </Link>
                         <Link
                             href="/signup"
                             className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                         >
                             <UserPlus className="h-5 w-5" />
-                            <span>Sign Up</span>
+                            <span>{t('common.signup')}</span>
                         </Link>
                     </>
                 )}
@@ -128,7 +128,7 @@ const Navbar = () => {
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     <Home className="h-5 w-5" />
-                                    <span>Dashboard</span>
+                                    <span>{t('common.dashboard')}</span>
                                 </Link>
                                 <Link
                                     href="/discover"
@@ -136,7 +136,7 @@ const Navbar = () => {
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     <Search className="h-5 w-5" />
-                                    <span>Discover Polls</span>
+                                    <span>{t('common.discover')}</span>
                                 </Link>
                                 <Link
                                     href="/profile"
@@ -154,7 +154,7 @@ const Navbar = () => {
                                     className="flex items-center space-x-1 dark:text-gray-300 text-red-600"
                                 >
                                     <LogOut className="h-5 w-5" />
-                                    <span>Logout</span>
+                                    <span>{t('common.logout')}</span>
                                 </button>
                             </>
                         ) : (
@@ -165,7 +165,7 @@ const Navbar = () => {
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     <LogIn className="h-5 w-5" />
-                                    <span>Login</span>
+                                    <span>{t('common.login')}</span>
                                 </Link>
                                 <Link
                                     href="/signup"
@@ -173,7 +173,7 @@ const Navbar = () => {
                                     onClick={() => setMenuOpen(false)}
                                 >
                                     <UserPlus className="h-5 w-5" />
-                                    <span>Sign Up</span>
+                                    <span>{t('common.signup')}</span>
                                 </Link>
                             </>
                         )}

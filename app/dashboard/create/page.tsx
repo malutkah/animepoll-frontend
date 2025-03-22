@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
 import {InfoIcon} from "lucide-react";
+import useTranslation from "@/lib/useTranslation";
 
 interface AnimeGenre {
     id: string;
@@ -23,6 +24,13 @@ const CreateSurveyPage = () => {
     const [genreId, setGenreId] = useState('')
     const [genre, setGenre] = useState('')
     const router = useRouter()
+    const {t} = useTranslation()
+
+    // {t('common.survey.')}
+    // {t('common.')}
+    // t('common.survey.')
+    // t('common.errors.err_')
+    // t('common.')
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -35,12 +43,12 @@ const CreateSurveyPage = () => {
             })
             if (!res.ok) {
                 const err = await res.json()
-                setError(err.message || "Failed to create survey")
+                setError(err.message || t('common.errors.err_survey_create'))
                 return
             }
             router.push("/dashboard")
         } catch (err) {
-            setError("Failed to create survey")
+            setError(t('common.errors.err_survey_create'))
         } finally {
             setIsLoading(false)
         }
@@ -53,7 +61,7 @@ const CreateSurveyPage = () => {
             const res = await fetch(baseURL()+"/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load genres");
+                setError(err.message || t('common.errors.err_genre_load'));
                 return;
             }
             const data = await res.json()
@@ -61,7 +69,7 @@ const CreateSurveyPage = () => {
 
         } catch (err) {
             setIsLoading(false);
-            setError("Failed getting genres");
+            setError(t('common.errors.err_genre_load'));
             console.log(err)
         } finally {
             setIsLoading(false)
@@ -90,11 +98,11 @@ const CreateSurveyPage = () => {
     return (
         <ProtectedRoute>
             <div>
-                <h1 className="text-3xl font-bold mb-4">Create New Survey</h1>
+                <h1 className="text-3xl font-bold mb-4">{t('common.survey.create_survey')}</h1>
                 {error && <p className="text-red-500">{error}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block">Title</label>
+                        <label className="block">{t('common.survey.title')}</label>
                         <input
                             type="text"
                             value={title}
@@ -104,7 +112,7 @@ const CreateSurveyPage = () => {
                         />
                     </div>
                     <div>
-                        <label className="block">Description</label>
+                        <label className="block">{t('common.survey.description')}</label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -130,18 +138,18 @@ const CreateSurveyPage = () => {
                         ) : (<p>Loading Genres</p>)}
                     </div>
                     <div>
-                        <label className="block">Visibility</label>
+                        <label className="block">{t('common.survey.visibility')}</label>
                         <select
                             value={visibility}
                             onChange={(e) => setVisibility(e.target.value)}
                             className="border p-2 w-full bg-gray-900 border-gray-300 rounded-xl"
                         >
                             {/*<option value="public">Public</option>*/}
-                            <option value="private">Private</option>
+                            <option value="private">{t('common.survey.private')}</option>
                         </select>
                         <span className={"flex align-middle mt-4"}>
                             <InfoIcon className={"text-orange-400 mr-4"} />
-                            <p className={"text-orange-400"}>You can set your survey public once it has at least one question</p>
+                            <p className={"text-orange-400"}>{t('common.survey.cant_set_public')}</p>
                         </span>
                     </div>
                     <button
@@ -149,7 +157,7 @@ const CreateSurveyPage = () => {
                         disabled={isLoading}
                         className="dark:bg-emerald-700 dark:hover:bg-green-800 text-white font-bold py-2 px-4 rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     >
-                        {isLoading ? "Creating..." : "Create Survey"}
+                        {isLoading ? t('common.creating') : t('common.survey.create_survey')}
                     </button>
                 </form>
             </div>

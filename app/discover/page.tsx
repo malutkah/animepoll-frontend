@@ -6,6 +6,7 @@ import {authFetch, baseURL} from "@/lib/api";
 import { useToast } from "@/app/components/ToastProvider";
 import BarChart from "@/app/components/BarChart";
 import { Filter } from "lucide-react";
+import useTranslation from "@/lib/useTranslation";
 
 interface Survey {
     id: string;
@@ -21,6 +22,7 @@ interface AnimeGenre {
 }
 
 const DiscoverPage = () => {
+    const { t } = useTranslation();
     const [surveys, setSurveys] = useState<Survey[]>([]);
     const [error, setError] = useState("");
     const [genres, setGenres] = useState<AnimeGenre[]>([]);
@@ -39,13 +41,13 @@ const DiscoverPage = () => {
             const res = await fetch(baseURL()+"/poll/survey/discover");
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.message || err.error || "Failed to load public surveys");
+                setError(err.message || err.error || t("common.errors.err_surveys_load"));
                 return;
             }
             const data = await res.json();
             setSurveys(data);
         } catch (err) {
-            setError("Failed to load public surveys");
+            setError(t("common.errors.err_surveys_load"));
         }
     };
 
@@ -55,13 +57,13 @@ const DiscoverPage = () => {
             const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load genres");
+                setError(err.message || t("common.errors.err_get_genres"));
                 return;
             }
             const data = await res.json();
             setGenres(data);
         } catch (err) {
-            setError("Failed getting genres");
+            setError(t("common.errors.err_get_genres"));
             console.error(err);
         }
     };
@@ -73,19 +75,19 @@ const DiscoverPage = () => {
 
     // Filter surveys based on search term and selected genres, then sort by update_timestamp
     const filteredSurveys = surveys && surveys.filter((survey) => {
-            const searchMatch = survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                survey.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const searchMatch = survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            survey.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const genreMatch = selectedGenres.length === 0 ||
-                selectedGenres.includes(survey.genre_name);
+        const genreMatch = selectedGenres.length === 0 ||
+            selectedGenres.includes(survey.genre_name);
 
-            return searchMatch && genreMatch;
+        return searchMatch && genreMatch;
 
-        }).sort((a, b) => {
-            const dateA = new Date(a.update_timestamp).getTime();
-            const dateB = new Date(b.update_timestamp).getTime();
-            return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-        });
+    }).sort((a, b) => {
+        const dateA = new Date(a.update_timestamp).getTime();
+        const dateB = new Date(b.update_timestamp).getTime();
+        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
     // Handle changes to the genre checkboxes
     const handleGenreCheckboxChange = (genreName: string, checked: boolean) => {
@@ -133,14 +135,14 @@ const DiscoverPage = () => {
 
     return (
         <div className="space-y-8">
-            <h1 className="text-4xl font-bold text-white">Discover Polls</h1>
+            <h1 className="text-4xl font-bold text-white">{t("common.pg_discover.title")}</h1>
             {error && <p className="text-red-500">{error}</p>}
 
             {/* Search Bar */}
             <div>
                 <input
                     type="text"
-                    placeholder="Search surveys..."
+                    placeholder={t("common.pg_discover.search")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -155,12 +157,12 @@ const DiscoverPage = () => {
                     className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-gray-800 dark:text-white px-3 py-2 rounded focus:outline-none"
                 >
                     <Filter className="h-5 w-5" />
-                    <span>Filter by Genre</span>
+                    <span>{t("common.pg_discover.filter_by_genre")}</span>
                 </button>
                 {genreDropdownOpen && (
                     <div className="absolute z-10 mt-2 w-64 bg-white dark:bg-gray-700 rounded shadow-lg p-4">
                         <p className="mb-2 font-semibold text-gray-800 dark:text-gray-200">
-                            Select Genres
+                            {t("common.pg_discover.select_genres")}
                         </p>
                         <div className="max-h-48 overflow-y-auto">
                             {genres.map((g) => (
@@ -188,31 +190,31 @@ const DiscoverPage = () => {
             {/* Sorting Toggle & Clear Filter Button */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold">Sort by Date:</span>
+                    <span className="text-white font-semibold">{t("common.pg_discover.sort_by_date")}</span>
                     <button
                         onClick={toggleSortOrder}
                         className={`relative inline-flex items-center h-6 w-11 rounded-full ${sortOrder === "newest" ? "dark:bg-emerald-700 " : "dark:bg-gray-600 "} focus:outline-none`}
                     >
-            <span
-                className={`inline-block w-4 h-4 bg-white rounded-full transform transition-transform ${sortOrder === "newest" ? "translate-x-1" : "translate-x-6"}`}
-            ></span>
+                        <span
+                            className={`inline-block w-4 h-4 bg-white rounded-full transform transition-transform ${sortOrder === "newest" ? "translate-x-1" : "translate-x-6"}`}
+                        ></span>
                     </button>
                     <span className="text-white">
-            {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </span>
+                        {sortOrder === "newest" ? t("common.pg_discover.newest") : t("common.pg_discover.oldest")}
+                    </span>
                 </div>
                 <button
                     onClick={clearFilters}
                     className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded"
                 >
-                    Clear Filters
+                    {t("common.pg_discover.clear_filters")}
                 </button>
             </div>
 
             {/* Display Surveys */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {!filteredSurveys || filteredSurveys.length === 0 ? (
-                    <p className="text-white">No surveys found.</p>
+                    <p className="text-white">{t("common.pg_discover.no_surveys")}</p>
                 ) : (
                     filteredSurveys.map((survey) => (
                         <div
@@ -229,15 +231,14 @@ const DiscoverPage = () => {
                                 {survey.description}
                             </p>
                             <p className="text-gray-500 text-xs mt-1">
-                                Last updated:{" "}
-                                {new Date(survey.update_timestamp).toLocaleString()}
+                                {t("common.pg_discover.last_updated").replace('{0}', new Date(survey.update_timestamp).toLocaleString())}
                             </p>
                             <div className="mt-4">
                                 <Link
                                     href={`/discover/${survey.id}`}
                                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded"
                                 >
-                                    View Survey
+                                    {t("common.pg_discover.view_survey")}
                                 </Link>
                             </div>
                         </div>

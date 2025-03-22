@@ -2,6 +2,7 @@
 
 import { useState, useMemo, memo } from "react";
 import { formatTimestamp } from "@/lib/utils";
+import useTranslation from "@/lib/useTranslation";
 
 interface Question {
     id: string;
@@ -24,6 +25,8 @@ const TextResponsePanel = memo(({ question, responses }: TextResponsePanelProps)
     const [isOpen, setIsOpen] = useState(false);
     const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
+    const {t} = useTranslation();
+
     // Memoize sorted responses to prevent re-sorting on each render
     const sortedResponses = useMemo(() => {
         return [...responses].sort((a, b) => {
@@ -32,6 +35,8 @@ const TextResponsePanel = memo(({ question, responses }: TextResponsePanelProps)
             return sortOrder === "newest" ? timeB - timeA : timeA - timeB;
         });
     }, [responses, sortOrder]);
+
+    //{t('common.')}
 
     return (
         <div className="mb-6 border border-gray-300 rounded-xl overflow-hidden shadow-md">
@@ -42,8 +47,8 @@ const TextResponsePanel = memo(({ question, responses }: TextResponsePanelProps)
                 aria-expanded={isOpen}
                 aria-controls="text-responses-panel"
             >
-                <span className="font-bold text-lg">Question: {question.survey_text}</span>
-                <span className="text-sm">{isOpen ? "Hide Responses" : "Show Responses"}</span>
+                <span className="font-bold text-lg">{t('common.question')}: {question.survey_text}</span>
+                <span className="text-sm">{isOpen ? t('common.survey.hide_responses') : t('common.survey.show_responses')}</span>
             </button>
 
             {isOpen && (
@@ -52,15 +57,15 @@ const TextResponsePanel = memo(({ question, responses }: TextResponsePanelProps)
                     className="p-4 bg-gray-900 text-white transition-all duration-300"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <span className="font-semibold">Sort Responses:</span>
+                        <span className="font-semibold">{t('common.survey.sort_responses')}:</span>
                         <select
                             value={sortOrder}
                             onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
                             className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-white"
                             aria-label="Sort responses by"
                         >
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
+                            <option value="newest">{t('common.survey.newest_first')}</option>
+                            <option value="oldest">{t('common.survey.oldest_first')}</option>
                         </select>
                     </div>
 
@@ -76,7 +81,7 @@ const TextResponsePanel = memo(({ question, responses }: TextResponsePanelProps)
                             ))}
                         </ul>
                     ) : (
-                        <p className="text-gray-400">No responses yet.</p>
+                        <p className="text-gray-400">{t('common.survey.no_responses')}</p>
                     )}
                 </div>
             )}

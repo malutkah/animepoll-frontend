@@ -8,18 +8,22 @@ import RatingInput, { RatingInputProps } from "@/app/components/RatingInput";
 import RatingDistributionChart from "@/app/components/RatingDistributionChart";
 import TextResponsePanel from "@/app/components/TextResponsePanel";
 import {authFetch, baseURL, wsURL} from "@/lib/api";
+import useTranslation from "@/lib/useTranslation";
 
 const PublicSurveyPage = () => {
+    const { t } = useTranslation();
     const params = useParams() as { surveyId: string };
     const { addToast } = useToast();
 
     const [survey, setSurvey] = useState<Survey | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [responses, setResponses] = useState<{ [key: string]: string }>({});
+    const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
     const [aggregatedResults, setAggregatedResults] = useState<{ [key: string]: AggregatedQuestionResult }>({});
     const [error, setError] = useState("");
     const [genres, setGenres] = useState<{ id: string; name: string }[]>([]);
     const [genre, setGenre] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Toggle state: "questions" or "results"
     const [viewMode, setViewMode] = useState<"questions" | "results">("questions");
@@ -77,7 +81,7 @@ const PublicSurveyPage = () => {
             const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/public`);
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load survey details");
+                setError(err.message || t("common.errors.err_survey_load"));
                 return;
             }
             const data = await res.json();
@@ -88,7 +92,7 @@ const PublicSurveyPage = () => {
                 genre_id: data.genre_id,
             });
         } catch (err) {
-            setError("Failed to load survey details");
+            setError(t("common.errors.err_survey_load"));
         }
     };
 
@@ -97,13 +101,13 @@ const PublicSurveyPage = () => {
             const res = await fetch(baseURL()+"/poll/survey/genres");
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load genres");
+                setError(err.message || t("common.errors.err_get_genres"));
                 return;
             }
             const data = await res.json();
             setGenres(data);
         } catch (err) {
-            setError("Failed getting genres");
+            setError(t("common.errors.err_get_genres"));
             console.log(err);
         }
     };
@@ -113,13 +117,13 @@ const PublicSurveyPage = () => {
             const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/questions/public`);
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load questions");
+                setError(err.message || t("common.errors.err_questions_load"));
                 return;
             }
             const data = await res.json();
             setQuestions(data);
         } catch (err) {
-            setError("Failed to load questions");
+            setError(t("common.errors.err_questions_load"));
         }
     };
 
@@ -128,7 +132,7 @@ const PublicSurveyPage = () => {
             const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/results/public`);
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load results");
+                setError(err.message || t("common.errors.err_results_load"));
                 return;
             }
             const data: AggregatedSurveyResult = await res.json();
@@ -148,7 +152,7 @@ const PublicSurveyPage = () => {
             }
         } catch (err) {
             console.error(err);
-            setError("Failed to load results");
+            setError(t("common.errors.err_results_load"));
         }
     };
 
@@ -163,18 +167,75 @@ const PublicSurveyPage = () => {
     }, [survey, genres]);
 
     const handleResponseChange = (questionId: string, value: string) => {
+        // Clear validation error for this question when user starts typing
+        if (validationErrors[questionId]) {
+            setValidationErrors(prev => {
+                const updated = {...prev};
+                delete updated[questionId];
+                return updated;
+            });
+        }
         setResponses((prev) => ({ ...prev, [questionId]: value }));
+    };
+
+    // Validate all responses before submission
+    const validateResponses = () => {
+        const errors: { [key: string]: string } = {};
+        let hasAnyResponse = false;
+
+        questions.forEach(question => {
+            const response = responses[question.id];
+
+            // Check if this question has been answered
+            if (response && response.trim() !== '') {
+                hasAnyResponse = true;
+
+                // For text questions, ensure they're not just whitespace
+                if (question.type === "text" && response.trim() === "") {
+                    errors[question.id] = t("common.survey.validation_text_required");
+                }
+            }
+        });
+
+        // If no questions have been answered at all
+        if (!hasAnyResponse) {
+            addToast(t("common.survey.validation_min_one_question"), "error");
+            return false;
+        }
+
+        // Set any field-specific validation errors
+        setValidationErrors(errors);
+
+        // Return true if no errors
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmitResponses = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        // Don't submit if already submitting (prevent double submission)
+        if (isSubmitting) return;
+
+        // Validate responses before attempting submission
+        if (!validateResponses()) {
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Only include non-empty responses
+        const filteredResponses = Object.entries(responses)
+            .filter(([_, value]) => value && value.trim() !== "")
+            .map(([questionId, value]) => ({
+                question_id: questionId,
+                answer_value: value
+            }));
+
         const payload = {
-            responses: questions.map((q) => ({
-                question_id: q.id,
-                answer_value: responses[q.id] || "",
-            })),
+            responses: filteredResponses
         };
+
         try {
             const res = await fetch(baseURL()+`/poll/survey/${params.surveyId}/responses/public`, {
                 method: "POST",
@@ -183,21 +244,35 @@ const PublicSurveyPage = () => {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.message || "Failed to submit responses");
-                addToast(err.message || "Failed to submit responses", "error");
+                setError(err.message || t("common.errors.err_responses_submit"));
+                addToast(err.message || t("common.errors.err_responses_submit"), "error");
                 return;
             }
-            addToast("Responses submitted successfully", "success");
+            addToast(t("common.success.succ_responses_submitted"), "success");
+            // Clear responses after successful submission
+            setResponses({});
+            // Switch to results view after submission
+            setViewMode("results");
             fetchResults();
         } catch (err) {
-            setError("Failed to submit responses");
-            addToast("Failed to submit responses", "error");
+            setError(t("common.errors.err_responses_submit"));
+            addToast(t("common.errors.err_responses_submit"), "error");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     // Prepare aggregated results as an array for pagination
     const aggregatedResultsArray = Object.values(aggregatedResults);
     const totalResults = aggregatedResultsArray.length;
+
+    // Check if a specific question has a validation error
+    const hasError = (questionId: string) => Boolean(validationErrors[questionId]);
+
+    // Check if a question has been answered
+    const isQuestionAnswered = (questionId: string) => {
+        return responses[questionId] && responses[questionId].trim() !== "";
+    };
 
     return (
         <div className="space-y-8">
@@ -209,10 +284,10 @@ const PublicSurveyPage = () => {
                         {survey.title} <span className="text-2xl animate-pulse">🎌🔥</span>
                     </h1>
                     <p className="text-white text-lg mb-2">{survey.description}</p>
-                    {genre && <p className="text-white text-base">Genre: {genre}</p>}
+                    {genre && <p className="text-white text-base">{t("common.survey.genre")}: {genre}</p>}
                 </div>
             ) : (
-                <p>Loading survey details...</p>
+                <p>{t("common.loading")}</p>
             )}
 
             {/* Toggle Button Group */}
@@ -223,7 +298,7 @@ const PublicSurveyPage = () => {
                         viewMode === "questions" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                 >
-                    Answer Survey
+                    {t("common.survey.answer_survey")}
                 </button>
                 <button
                     onClick={() => {
@@ -234,23 +309,28 @@ const PublicSurveyPage = () => {
                         viewMode === "results" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                 >
-                    View Results
+                    {t("common.survey.view_results")}
                 </button>
             </div>
 
             {viewMode === "questions" ? (
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideInLeft">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Questions</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">{t("common.survey.questions")}</h2>
                     {questions.length > 0 ? (
                         <form onSubmit={handleSubmitResponses} className="space-y-6">
                             {questions.map((question, i) => (
-                                <div key={question.id} className="p-6 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 mb-6">
+                                <div
+                                    key={question.id}
+                                    className={`p-6 border ${hasError(question.id) ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'} 
+                                        rounded-xl bg-gray-50 dark:bg-gray-700 mb-6 
+                                        ${isQuestionAnswered(question.id) ? 'ring-2 ring-green-400 ring-opacity-50' : ''}`}
+                                >
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                         {question.survey_text}
                                     </h3>
                                     {question.type === "multiple-choice" || question.type === "multiple_choice" ? (
                                         <>
-                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Select an Answer:</p>
+                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">{t("common.survey.select_answer")}:</p>
                                             <div className="space-y-3">
                                                 {question.possible_answers.map((option: string, idx: number) => (
                                                     <label key={idx} className="flex items-center">
@@ -273,8 +353,8 @@ const PublicSurveyPage = () => {
                                                 range: 5,
                                                 displayType: "star",
                                                 allowHalfSteps: false,
-                                                minText: "Very bad",
-                                                maxText: "Perfect",
+                                                minText: t("common.survey.min_label"),
+                                                maxText: t("common.survey.max_label"),
                                                 value: 0,
                                                 onChange: (val: number) => handleResponseChange(question.id, String(val)),
                                                 interactive: true,
@@ -286,8 +366,8 @@ const PublicSurveyPage = () => {
                                                         range: parsed.range || 5,
                                                         displayType: parsed.displayType || "star",
                                                         allowHalfSteps: parsed.allowHalfSteps || false,
-                                                        minText: parsed.minText || "Very bad",
-                                                        maxText: parsed.maxText || "Perfect",
+                                                        minText: parsed.minText || t("common.survey.min_label"),
+                                                        maxText: parsed.maxText || t("common.survey.max_label"),
                                                         value: Number(responses[question.id] || 0),
                                                         onChange: (val: number) => handleResponseChange(question.id, String(val)),
                                                         interactive: true,
@@ -300,27 +380,40 @@ const PublicSurveyPage = () => {
                                         })()
                                     ) : (
                                         <>
-                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Your Answer:</p>
+                                            <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">{t("common.survey.your_answer")}:</p>
                                             <div>
                                                 <textarea
                                                     name={question.id}
-                                                    placeholder="Type your answer here..."
+                                                    placeholder={t("common.survey.type_answer_here")}
                                                     value={responses[question.id] || ""}
                                                     maxLength={1000}
                                                     onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                                                    className="w-full p-3 border border-gray-300 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+                                                    className={`w-full p-3 border ${hasError(question.id) ? 'border-red-500' : 'border-gray-300'} 
+                                                        rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100`}
                                                 />
+                                                {hasError(question.id) && (
+                                                    <p className="mt-1 text-sm text-red-500">{validationErrors[question.id]}</p>
+                                                )}
                                             </div>
                                         </>
                                     )}
                                 </div>
                             ))}
-                            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md">
-                                Submit Responses
-                            </button>
+                            <div className="flex flex-col gap-2">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 italic">
+                                    {t("common.survey.at_least_one_required")}
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isSubmitting ? t("common.survey.submitting") : t("common.survey.submit_responses")}
+                                </button>
+                            </div>
                         </form>
                     ) : (
-                        <p className="text-gray-800 dark:text-gray-100">No questions found.</p>
+                        <p className="text-gray-800 dark:text-gray-100">{t("common.survey.no_questions")}</p>
                     )}
                 </div>
             ) : (
@@ -328,7 +421,7 @@ const PublicSurveyPage = () => {
                     {totalResults > 0 && (
                         <div className="mb-6 flex justify-between items-center">
                             <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                Question {currentResultIndex + 1} of {totalResults}
+                                {t("common.survey.question_pagination").replace('{0}', (currentResultIndex + 1).toString()).replace('{1}', totalResults.toString())}
                             </p>
                             <div className="space-x-3">
                                 <button
@@ -336,7 +429,7 @@ const PublicSurveyPage = () => {
                                     disabled={currentResultIndex === 0}
                                     className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                 >
-                                    Previous
+                                    {t("common.previous")}
                                 </button>
                                 <button
                                     onClick={() =>
@@ -347,13 +440,13 @@ const PublicSurveyPage = () => {
                                     disabled={currentResultIndex === totalResults - 1}
                                     className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-50 transition-colors"
                                 >
-                                    Next
+                                    {t("common.next")}
                                 </button>
                             </div>
                         </div>
                     )}
                     {totalResults === 0 ? (
-                        <p className="text-gray-800 dark:text-gray-100">No aggregated results yet...</p>
+                        <p className="text-gray-800 dark:text-gray-100">{t("common.survey.no_results")}</p>
                     ) : (
                         (() => {
                             const aggResult = aggregatedResultsArray[currentResultIndex];
@@ -372,7 +465,7 @@ const PublicSurveyPage = () => {
                                                 }))}
                                             />
                                         ) : (
-                                            <p className="text-gray-800 dark:text-gray-100">No options data.</p>
+                                            <p className="text-gray-800 dark:text-gray-100">{t("common.survey.no_options")}</p>
                                         )}
                                     </div>
                                 );
@@ -383,7 +476,7 @@ const PublicSurveyPage = () => {
                                             {aggResult.question_text}
                                         </h3>
                                         <p className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">
-                                            Average Rating: {aggResult.average_rating ? aggResult.average_rating.toFixed(1) : "N/A"} / 5
+                                            {t("common.survey.average_rating").replace('{0}', aggResult.average_rating ? aggResult.average_rating.toFixed(1) : "N/A").replace('{1}', "5")}
                                         </p>
                                         {aggResult.distribution ? (
                                             <RatingDistributionChart
@@ -391,7 +484,7 @@ const PublicSurveyPage = () => {
                                                 distribution={aggResult.distribution}
                                             />
                                         ) : (
-                                            <p className="text-gray-800 dark:text-gray-100">No distribution data.</p>
+                                            <p className="text-gray-800 dark:text-gray-100">{t("common.survey.no_distribution")}</p>
                                         )}
                                     </div>
                                 );

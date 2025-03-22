@@ -5,6 +5,7 @@ import Link from "next/link"
 import ProtectedRoute from "@/app/components/ProtectedRoute"
 import {authFetch, baseURL} from "@/lib/api"
 import { useMessage } from "@/app/components/MessageBoxExport";
+import useTranslation from "@/lib/useTranslation";
 
 interface Survey {
     id: string;
@@ -25,6 +26,8 @@ const DashboardPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const { showMessage } = useMessage();
 
+    const {t} = useTranslation();
+
     const [genres, setGenres] = useState<AnimeGenre[]>([])
 
     const fetchSurveys = async () => {
@@ -32,13 +35,13 @@ const DashboardPage = () => {
             const res = await authFetch("/poll/survey/all")
             if (!res.ok) {
                 const err = await res.json()
-                setError(err.message || "Failed to load surveys")
+                setError(err.message || t('common.errors.err_survey_load'))
                 return
             }
             const data = await res.json()
             setSurveys(data)
         } catch (err: any) {
-            setError("Failed to load surveys")
+            setError(t('common.errors.err_survey_load'))
         }
     }
 
@@ -47,14 +50,14 @@ const DashboardPage = () => {
             const res = await fetch(baseURL()+"/poll/survey/genres")
             if (res.status !== 200) {
                 const err = await res.json();
-                setError(err.message || "Failed to load genres");
+                setError(err.message || t('common.errors.err_genres_load'));
                 return;
             }
             const data = await res.json()
             setGenres(data);
 
         } catch (err) {
-            setError("Failed getting genres");
+            setError(t('common.errors.err_genres_load'));
             console.log(err)
         } finally {
         }
@@ -71,7 +74,7 @@ const DashboardPage = () => {
             if (genre) {
                 return genre.name
             } else {
-                return "No genre";
+                return t('common.errors.err_no_genre');
             }
         }
     }
@@ -97,8 +100,8 @@ const DashboardPage = () => {
     const handleDelete = async (id: string) => {
         const msgId = showMessage({
             type: "question",
-            title: "Delete Survey",
-            message: "Are you sure you want to delete this survey? This action cannot be undone.",
+            title: t('common.survey.delete_survey'),
+            message: t('common.msg_confirm.delete_survey '),
             onConfirm: async () => {
                 try {
                     const res = await authFetch(`/poll/survey/${id}`, {
@@ -108,8 +111,8 @@ const DashboardPage = () => {
                         const err = await res.json()
                         showMessage({
                             type: 'error',
-                            title: 'Deletion Failed',
-                            message: err.message || "Failed to delete question",
+                            title: t('common.errors.err_deletion'),
+                            message: err.message || t('common.errors.err_question_delete'),
                             showIcon: true,
                             autoClose: true
                         });
@@ -150,11 +153,11 @@ const DashboardPage = () => {
     return (
         <ProtectedRoute>
             <div>
-                <h1 className="text-4xl font-bold mb-6 text-white">Dashboard</h1>
+                <h1 className="text-4xl font-bold mb-6 text-white">{t('common.dashboard')}</h1>
                 <div className="mb-4">
                     <input
                         type="text"
-                        placeholder="Search surveys..."
+                        placeholder={t('common.survey.search_surveys')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -165,7 +168,7 @@ const DashboardPage = () => {
                         href="/dashboard/create"
                         className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                     >
-                        Create New Survey
+                        {t('common.survey.create_survey')}
                     </Link>
                 </div>
                 {error && <p className="text-red-500 mt-4">{error}</p>}
@@ -186,19 +189,19 @@ const DashboardPage = () => {
                                         href={`/dashboard/${survey.id}`}
                                         className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-1 px-3 rounded"
                                     >
-                                        View
+                                        {t('common.pg_discover.view_survey')}
                                     </Link>
                                     <Link
                                         href={`/dashboard/${survey.id}/edit`}
                                         className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-1 px-3 rounded"
                                     >
-                                        Edit
+                                        {t('common.edit')}
                                     </Link>
                                     <button
                                         onClick={() => handleDelete(survey.id)}
                                         className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded"
                                     >
-                                        Delete
+                                        {t('common.delete')}
                                     </button>
                                 </div>
                             </div>
