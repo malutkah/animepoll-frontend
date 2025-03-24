@@ -1,6 +1,7 @@
 "use client"
 
 import {memo} from "react";
+import useTranslation from "@/lib/useTranslation";
 
 interface ModalBoxProps {
     title: string;
@@ -27,6 +28,9 @@ const ModalBox = memo(({
                       onNextClick,
                       onClose
                   }: ModalBoxProps) => {
+
+    const {t} = useTranslation();
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" role="dialog"
              aria-modal="true">
@@ -50,14 +54,14 @@ const ModalBox = memo(({
                                 onClick={onYesClick}
                                 className="bg-emerald-400 hover:bg-emerald-600 text-gray-800 font-bold py-2 px-4 rounded"
                             >
-                                Yes
+                                {t("common.yes")}
                             </button>
                             <button
                                 type="button"
                                 onClick={onNoClick}
                                 className="bg-red-500 hover:bg-red-700 text-gray-800 font-bold py-2 px-4 rounded"
                             >
-                                No
+                                {t("common.no")}
                             </button>
                         </>
                     ) : (
@@ -66,7 +70,7 @@ const ModalBox = memo(({
                             onClick={onNextClick}
                             className="bg-blue-300 hover:bg-blue-400 text-gray-800 font-bold py-2 px-4 rounded"
                         >
-                            Continue
+                            {t("common.continue")}
                         </button>
                     )}
                     <button
@@ -74,7 +78,7 @@ const ModalBox = memo(({
                         onClick={onClose}
                         className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                     >
-                        Cancel
+                        {t("common.cancel")}
                     </button>
                 </div>
 
