@@ -25,8 +25,8 @@ const LanguageSwitcher = () => {
                     onChange={handleLanguageChange}
                     className="bg-transparent border-none outline-none cursor-pointer"
                 >
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
+                    <option className={"text-black hover:text-indigo-500"} value="en">English</option>
+                    <option className={"text-black hover:text-indigo-500"} value="de">Deutsch</option>
                 </select>
             </div>
         </div>
