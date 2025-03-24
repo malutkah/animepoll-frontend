@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link";
-import {FormEvent, useState, useCallback} from "react";
+import {FormEvent, useCallback, useState} from "react";
 import {useRouter} from "next/navigation";
-import {authFetch, baseURL} from "@/lib/api";
-import { Shield } from "lucide-react";
+import {baseURL} from "@/lib/api";
+import {Shield} from "lucide-react";
+import {useAuth} from "@/lib/AuthContext";
 
 interface FormState {
     email: string;
@@ -26,6 +27,7 @@ const LoginForm = () => {
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const {login} = useAuth();
 
     // TOTP related states
     const [showTotpVerification, setShowTotpVerification] = useState(false);
@@ -77,53 +79,6 @@ const LoginForm = () => {
         return isValid;
     }, [formState]);
 
-    // // Validate TOTP code
-    // const validateTotpCode = useCallback((): boolean => {
-    //     const newErrors: FormErrors = {};
-    //     let isValid = true;
-    //
-    //     if (!totpCode) {
-    //         newErrors.totp = "TOTP code is required";
-    //         isValid = false;
-    //     } else if (totpCode.length !== 6 || !/^\d+$/.test(totpCode)) {
-    //         newErrors.totp = "TOTP code must be 6 digits";
-    //         isValid = false;
-    //     }
-    //
-    //     try {
-    //         const res = await authFetch("/user/verify-totp?code="+code, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({
-    //                 "email": email
-    //             })
-    //         });
-    //
-    //         if (!res.ok) {
-    //             const err = await res.json();
-    //             setError(err.message || "Failed to verify code");
-    //             setIsLoading(false);
-    //             return;
-    //         }
-    //
-    //         setIsSuccess(true);
-    //
-    //         // Redirect after successful verification (after showing success message briefly)
-    //         setTimeout(() => {
-    //             router.push("/dashboard");
-    //         }, 2000);
-    //
-    //     } catch (err) {
-    //         setError("Something went wrong. Please try again.");
-    //         console.error(err);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    //
-    //     setErrors(newErrors);
-    //     return isValid;
-    // }, [totpCode]);
-
     // Handle login with TOTP verification
     const handleSubmitTotp = useCallback(async (e: FormEvent) => {
         e.preventDefault();
@@ -148,12 +103,8 @@ const LoginForm = () => {
                 setIsLoading(false);
                 return;
             }
-            // Complete the login process
-            localStorage.setItem("token", loginResponse.access_token);
-            localStorage.setItem("refresh_token", loginResponse.refresh_token);
-            localStorage.setItem("expires_at", loginResponse.expires_at.toString());
-            router.push("/dashboard");
 
+            router.push("/dashboard");
         } catch (err) {
             setErrors({totp: "Something went wrong. Please try again."});
             console.error(err);
@@ -175,39 +126,30 @@ const LoginForm = () => {
         setIsLoading(true);
 
         try {
-            const res = await fetch(baseURL() + "/auth/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(formState),
-            });
+            const { success, error, totp_required } = await login(formState.email, formState.password);
 
-            if (res.status !== 201) {
-                const err = await res.json();
-                setErrors({general: err.message || "Login failed"});
+            if (!success) {
+                setErrors({ general: error || "Login failed" });
                 setIsLoading(false);
                 return;
             }
 
-            const data = await res.json();
-            setLoginResponse(data);
-
-            // Check if TOTP is required
-            if (data.totp_required) {
+            // Check for TOTP requirement (you'll need to adjust how this is determined)
+            // This might come from a specific response header or JSON property
+             // You'll need to update this logic
+            if (totp_required) {
                 setShowTotpVerification(true);
                 setIsLoading(false);
                 return;
             }
 
-            // If no TOTP required, proceed with normal login
-            localStorage.setItem("token", data.access_token);
-            localStorage.setItem("refresh_token", data.refresh_token);
-            localStorage.setItem("expires_at", data.expires_at.toString());
+            // If no TOTP required, proceed with navigation
             router.push("/dashboard");
         } catch (err: any) {
             setErrors({general: "Something went wrong. Please try again."});
             setIsLoading(false);
         }
-    }, [formState, validateForm, router]);
+    }, [formState, validateForm, login, router]);
 
     // If we're showing TOTP verification, display that form
     if (showTotpVerification) {

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import {useAuth} from "@/lib/AuthContext";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -9,16 +10,21 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const router = useRouter();
+    const { isAuthenticated, loading } = useAuth();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const expiresAt = localStorage.getItem("expires_at");
-        if (!token || !expiresAt || Number(expiresAt) * 1000 < Date.now()) {
+        if (!loading && !isAuthenticated) {
             router.push("/login");
         }
-    }, [router]);
+    }, [isAuthenticated, loading, router]);
 
-    return <>{children}</>;
+    // Show loading state while checking authentication
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    // Only render children if authenticated
+    return isAuthenticated ? <>{children}</> : null;
 }
 
 export default ProtectedRoute;
