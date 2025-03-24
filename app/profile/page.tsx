@@ -6,6 +6,7 @@ import {authFetch, baseURL} from "@/lib/api"
 import Link from "next/link";
 import ModalBox from "@/app/components/ModalBox";
 import useTranslation from "@/lib/useTranslation";
+import {useToast} from "@/app/components/ToastProvider";
 
 interface UserProfile {
     username: string;
@@ -41,7 +42,9 @@ const ProfilePage = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [countries, setCountries] = useState<Countries[]>([])
     const [profilePic, setProfilePic] = useState<string>("/profile-pic-empty.svg")
-    const [openModalBox, setOpenModalBox] = useState<any>(undefined)
+    const [openModalBox, setOpenModalBox] = useState<any>(undefined);
+
+    const {addToast} = useToast();
 
     const { t, locale } = useTranslation();
 
@@ -54,6 +57,7 @@ const ProfilePage = () => {
             if (!res.ok) {
                 const err = await res.json()
                 setError(err.message || t('common.error.err_get_profile'))
+                addToast(err.message || t('common.error.err_get_profile'), "error")
                 return
             }
             const data = await res.json()
@@ -70,7 +74,8 @@ const ProfilePage = () => {
                 setProfilePic(data.profilePicture)
             }
         } catch (err) {
-            setError(t('common.errors.err_get_profile'))
+            // setError(t('common.errors.err_get_profile'))
+            addToast(t('common.errors.err_get_profile'), "error")
         }
     }
 
@@ -186,6 +191,9 @@ const ProfilePage = () => {
                 return
             }
 
+            setOpenModalBox(undefined)
+            addToast("We've send you an email with further instructions", "info")
+
         } catch (err) {
             console.error("Error details:", err);
             setError(err.message || String(err) || t('common.errors.err_occurred'));
@@ -210,6 +218,9 @@ const ProfilePage = () => {
                 setError(err)
                 return
             }
+
+            setOpenModalBox(undefined)
+            addToast("2-Factor Authorization deactivated", "info")
 
         } catch (err) {
             console.error("Error details:", err);
@@ -339,7 +350,7 @@ const ProfilePage = () => {
                             <button
                                 type={"button"}
                                 value={"2FA"}
-                                onClick={() => openModalMessageBox("Enable 2FA", "continue to get the mail with instructions", "", "info", "next")}
+                                onClick={() => openModalMessageBox(t("common.pg_profile.2fa_dialog.enable_title"), t("common.pg_profile.2fa_dialog.enable_body"), "", "info", "next")}
                                 className={"w-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
                             >{t('common.pg_profile.enable_2fa')}
                             </button>
@@ -347,7 +358,7 @@ const ProfilePage = () => {
                             <button
                                 type={"button"}
                                 value={"2FA"}
-                                onClick={() => openModalMessageBox("Disable 2FA", "do you want to disable TOTP Verification?", "", "info", "yesno")}
+                                onClick={() => openModalMessageBox(t("common.pg_profile.2fa_dialog.disable_title"), t("common.pg_profile.2fa_dialog.disable_body"), "", "info", "yesno")}
                                 className={"w-full flex items-center justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-10"}
                             >{t('common.pg_profile.disable_2fa')}
                             </button>
