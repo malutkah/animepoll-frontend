@@ -120,7 +120,6 @@ const QuestionModal = memo(({ surveyId, question, onClose, onSave }: QuestionMod
             }
 
             onSave();
-            addToast(t("common.success.succ_question_updated"), "success");
         } catch (err) {
             setError(t("common.errors.err_question_update"));
             addToast(t("common.errors.err_occurred"), "error");
