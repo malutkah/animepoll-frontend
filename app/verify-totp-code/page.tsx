@@ -65,6 +65,22 @@ const Page = () => {
                 return;
             }
 
+            // update user account status
+            const res2 = await authFetch("/user/activate-totp", {
+                method: "PUT",
+                body: JSON.stringify({
+                    "email": email,
+                    "activation_successful": isSuccess,
+                })
+            })
+
+            if (!res2.ok) {
+                const err = await res.json();
+                setError(err.message || "Failed to verify code");
+                setIsLoading(false);
+                return;
+            }
+
             setIsSuccess(true);
 
             // Redirect after successful verification (after showing success message briefly)
