@@ -15,7 +15,8 @@ import {
     addDays,
     setHours,
     setMinutes,
-    parseISO
+    parseISO,
+    addMinutes
 } from "date-fns";
 import {Calendar, ChevronLeft, ChevronRight, Clock} from "lucide-react";
 
@@ -42,12 +43,40 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     const [view, setView] = useState<"date" | "time">("date");
     const pickerRef = useRef<HTMLDivElement>(null);
 
+    // Calculate UTC+1 offset in minutes
+    const getUtcPlusOneOffset = () => {
+        // UTC+1 is 60 minutes ahead of UTC
+        const utcPlusOneOffsetMinutes = 60;
+        // Get local timezone offset in minutes
+        const localOffsetMinutes = new Date().getTimezoneOffset();
+        // The difference is what we need to adjust
+        return utcPlusOneOffsetMinutes + localOffsetMinutes;
+    };
+
+    // Convert a date to UTC+1
+    const toUtcPlusOne = (date: Date): Date => {
+        return addMinutes(date, getUtcPlusOneOffset());
+    };
+
+    // Convert from UTC+1 to local time
+    const fromUtcPlusOne = (date: Date): Date => {
+        return addMinutes(date, -getUtcPlusOneOffset());
+    };
+
+    // Format a date in UTC+1 for display
+    const formatInUtcPlusOne = (date: Date, formatStr: string): string => {
+        const utcPlusOneDate = toUtcPlusOne(date);
+        return format(utcPlusOneDate, formatStr);
+    };
+
     useEffect(() => {
         if (value) {
-            setCurrentDate(value);
-            setCurrentMonth(startOfMonth(value));
-            setSelectedHour(value.getHours());
-            setSelectedMinute(value.getMinutes());
+            // Convert the incoming value to UTC+1 for internal state
+            const utcPlusOneValue = value; // Assuming value is already in UTC+1
+            setCurrentDate(utcPlusOneValue);
+            setCurrentMonth(startOfMonth(utcPlusOneValue));
+            setSelectedHour(utcPlusOneValue.getHours());
+            setSelectedMinute(utcPlusOneValue.getMinutes());
         }
     }, [value]);
 
@@ -79,6 +108,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     };
 
     const handleDateSelect = (date: Date) => {
+        // Create a new date in UTC+1
         const newDate = new Date(date);
         newDate.setHours(selectedHour);
         newDate.setMinutes(selectedMinute);
@@ -100,6 +130,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     };
 
     const handleTimeChange = () => {
+        // Create a new date in UTC+1
         const newDate = new Date(currentDate);
         newDate.setHours(selectedHour);
         newDate.setMinutes(selectedMinute);
@@ -235,7 +266,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
                 <div className="flex justify-center rounded-xl space-x-4 mb-4">
                     <div className="w-1/2 rounded-xl">
-                        <div className="text-center mb-2 text-gray-600 dark:text-gray-300">Hours</div>
+                        <div className="text-center mb-2 text-gray-600 dark:text-gray-300">Hours (UTC+1)</div>
                         <div className="h-48 overflow-y-auto border rounded-md border-gray-200 dark:border-gray-700">
                             {hours.map((hour) => (
                                 <div
@@ -285,10 +316,18 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
                 </div>
 
                 <div className="text-center font-semibold text-lg mb-4">
-                    {selectedHour.toString().padStart(2, "0")}:{selectedMinute.toString().padStart(2, "0")}
+                    {selectedHour.toString().padStart(2, "0")}:{selectedMinute.toString().padStart(2, "0")} (UTC+1)
                 </div>
             </div>
         );
+    };
+
+    // Format the display value in UTC+1
+    const getDisplayValue = () => {
+        if (!value) return "";
+
+        // Add UTC+1 label to the display
+        return `${format(value, "dd.MM.yyyy HH:mm")} (UTC+1)`;
     };
 
     return (
@@ -308,7 +347,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
                         disabled={disabled}
                         className="outline-none bg-transparent cursor-pointer w-full"
                         placeholder={placeholder}
-                        value={value ? format(value, "dd.MM.yyyy HH:mm") : ""}
+                        value={getDisplayValue()}
                     />
                 </div>
                 {value && (
