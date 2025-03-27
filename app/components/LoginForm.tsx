@@ -144,7 +144,7 @@ const LoginForm = () => {
             }
 
             // If no TOTP required, proceed with navigation
-            router.push("/dashboard");
+            router.push("/discover");
         } catch (err: any) {
             setErrors({general: "Something went wrong. Please try again."});
             setIsLoading(false);
