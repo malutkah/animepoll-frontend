@@ -612,7 +612,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({children}) 
     const t = useMemo(() => {
         return (path: string) => {
             const keys = path.split('.');
-            let namespace = keys[0];
+            const namespace = keys[0];
 
             // Handle missing namespace
             if (!translations[locale][namespace]) {

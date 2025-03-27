@@ -1,5 +1,4 @@
-// app/layout.tsx
-import {Inter, Montserrat} from "next/font/google";
+import {Montserrat} from "next/font/google";
 import {ThemeProvider} from "next-themes";
 import Navbar from "@/app/components/Navbar";
 import {ToastProvider} from "@/app/components/ToastProvider";
@@ -19,7 +18,7 @@ export const metadata = {
 
 export default function RootLayout({children}) {
     return (
-        <html lang="en">
+        <html>
         <body className={mon.className}>
         <ThemeProvider attribute="class">
             <MessageProvider>
