@@ -22,11 +22,13 @@ export function getCSRFToken(): string {
 export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const csrfToken = getCSRFToken();
 
+    console.log('csrfToken', csrfToken)
+
     const headers = new Headers(options.headers || {});
 
     // Add CSRF token for non-GET requests
     if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
-        headers.set('X-CSRF-Token', decodeURI(csrfToken));
+        headers.set('X-CSRF-Token', csrfToken);
     }
 
     const newOptions = { ...options, headers, credentials: 'include', };
