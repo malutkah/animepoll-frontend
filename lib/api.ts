@@ -27,7 +27,7 @@ export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const headers = new Headers(options.headers || {});
 
     // Add CSRF token for non-GET requests
-    if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
+    if (options.method && ['POST', 'PUT', 'GET', 'DELETE', 'PATCH'].includes(options.method)) {
         headers.set('X-CSRF-Token', csrfToken);
     }
 
