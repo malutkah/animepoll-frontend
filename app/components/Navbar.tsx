@@ -6,36 +6,19 @@ import {usePathname, useRouter} from "next/navigation"
 import LanguageSwitcher from './LanguageSwitcher';
 import useTranslation from '@/lib/useTranslation'
 import { Home, Search, User, LogOut, LogIn, UserPlus } from "lucide-react"
+import {useAuth} from "@/lib/AuthContext";
 
 const Navbar = () => {
-    const [loggedIn, setLoggedIn] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const { t } = useTranslation();
     const router = useRouter()
-    const pathname = usePathname()
+    const pathname = usePathname();
+    const { isAuthenticated, logout } = useAuth();
     const logo = "/logo_120_transparent.png"
 
-    // Check auth status on mount and whenever the pathname changes
-    useEffect(() => {
-        const token = localStorage.getItem("token")
-        setLoggedIn(!!token)
-    }, [pathname])
-
-    // Listen to storage events for cross-tab changes
-    useEffect(() => {
-        const handleStorageChange = () => {
-            const token = localStorage.getItem("token")
-            setLoggedIn(!!token)
-        }
-        window.addEventListener("storage", handleStorageChange)
-        return () => window.removeEventListener("storage", handleStorageChange)
-    }, [])
-
     const handleLogout = () => {
-        localStorage.removeItem("token")
-        localStorage.removeItem("expires_at")
-        router.push("/")
-        setLoggedIn(false)
+        logout();
+        setMenuOpen(false);
     }
 
     return (
@@ -48,7 +31,7 @@ const Navbar = () => {
             </Link>
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-6">
-                {loggedIn ? (
+                {isAuthenticated ? (
                     <>
                         <Link
                             href="/discover"
@@ -120,7 +103,7 @@ const Navbar = () => {
                 </button>
                 {menuOpen && (
                     <div className="absolute top-16 right-4 bg-white dark:bg-gray-800 shadow-md rounded p-4 z-10">
-                        {loggedIn ? (
+                        {isAuthenticated ? (
                             <>
                                 <Link
                                     href="/dashboard"
