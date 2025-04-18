@@ -24,7 +24,6 @@ export async function middleware(req: NextRequest) {
 
         const res = await fetch(base + "/user/check-reset-token?token="+params)
 
-
         const data = await res.json()
         console.log(data)
         if (res.status !== 200) {
