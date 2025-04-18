@@ -732,7 +732,7 @@ const EditSurveyPage = () => {
                         <h2 className="text-2xl font-bold">{t("common.survey.questions")}</h2>
                         <div className="text-sm bg-indigo-100 dark:bg-indigo-900/30 py-1 px-3 rounded-full">
                             <span className="font-semibold text-indigo-700 dark:text-indigo-300">
-                                {t("common.survey.question_count").replace('{0}',questions.length.toString())}
+                                {t("common.survey.question_count").replace('{0}', questions?.length?.toString() ?? '0')}
                             </span>
                         </div>
                     </div>
