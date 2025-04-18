@@ -134,9 +134,7 @@ const LoginForm = () => {
                 return;
             }
 
-            // Check for TOTP requirement (you'll need to adjust how this is determined)
-            // This might come from a specific response header or JSON property
-             // You'll need to update this logic
+            // Check for TOTP requirement
             if (totp_required) {
                 setShowTotpVerification(true);
                 setIsLoading(false);
