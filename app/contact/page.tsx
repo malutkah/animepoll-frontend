@@ -3,7 +3,9 @@
 import {FormEvent, useEffect, useState} from "react";
 import {usePathname} from "next/navigation";
 import {parseJWToken} from "@/lib/utils";
-import {authFetch, baseURL} from "@/lib/api";
+import {authFetch, baseURL, getCSRFToken} from "@/lib/api";
+import {cookies} from "next/headers";
+import {parseCookie} from "next/dist/compiled/@edge-runtime/cookies";
 
 
 const ContactPage = () => {
@@ -37,13 +39,13 @@ const ContactPage = () => {
     }
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        setLoggedIn(!!token)
+        const token = getCSRFToken() != '';
+        setLoggedIn(!!token);
     }, [pathname])
 
     useEffect(() => {
         if (loggedIn) {
-            fetchProfile()
+            fetchProfile();
         }
     }, [loggedIn]);
 
