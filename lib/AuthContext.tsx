@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = async () => {
         try {
-            await refreshCSRFToken();
+            //await refreshCSRFToken();
 
             await fetch(baseURL() + '/auth/logout', {
                 method: 'POST',
