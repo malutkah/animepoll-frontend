@@ -7,7 +7,11 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    i18n: i18nConfig.i18n,
+    i18n: {
+        ...i18nConfig.i18n,
+        localeDetection: false,
+    }
+
 };
 
 export default nextConfig;
