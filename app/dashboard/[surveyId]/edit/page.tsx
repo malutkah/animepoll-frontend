@@ -505,8 +505,8 @@ const EditSurveyPage = () => {
                                 )}
                             </div>
 
-                            {/* Timeframe section */}
-                            <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            {/* Timeframe section
+                             <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <ClockIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -578,6 +578,7 @@ const EditSurveyPage = () => {
                                     </div>
                                 )}
                             </div>
+                            */}
 
                             <div>
                                 <label className="block font-medium">{t("common.survey.visibility")}</label>
