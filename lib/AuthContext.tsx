@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const login = async (email: string, password: string) => {
         try {
             // Get a fresh CSRF token before login
-            await refreshCSRFToken();
+            // await refreshCSRFToken();
 
             const res = await fetch(baseURL() + '/auth/login', {
                 method: 'POST',
