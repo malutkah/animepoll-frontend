@@ -6,6 +6,7 @@ import {useRouter} from "next/navigation";
 import {baseURL} from "@/lib/api";
 import {Shield} from "lucide-react";
 import {useAuth} from "@/lib/AuthContext";
+import useTranslation from "@/lib/useTranslation";
 
 interface FormState {
     email: string;
@@ -20,6 +21,8 @@ interface FormErrors {
 }
 
 const LoginForm = () => {
+    const {t} = useTranslation();
+
     const [formState, setFormState] = useState<FormState>({
         email: '',
         password: ''
@@ -63,15 +66,15 @@ const LoginForm = () => {
         let isValid = true;
 
         if (!formState.email) {
-            newErrors.email = "Email is required";
+            newErrors.email = t("common.errors.err_email_req");
             isValid = false;
         } else if (!/\S+@\S+\.\S+/.test(formState.email)) {
-            newErrors.email = "Email is invalid";
+            newErrors.email = t("common.errors.err_email_invalid");
             isValid = false;
         }
 
         if (!formState.password) {
-            newErrors.password = "Password is required";
+            newErrors.password = t("common.errors.err_password_req");
             isValid = false;
         }
 
@@ -84,7 +87,7 @@ const LoginForm = () => {
         e.preventDefault();
 
         if (!totpCode || totpCode.length !== 6 || !/^\d+$/.test(totpCode)) {
-            setErrors({totp:'Please enter a valid 6-digit code'});
+            setErrors({totp:t("common.errors.err_totp_invalid")});
             return;
         }
 
@@ -99,14 +102,14 @@ const LoginForm = () => {
 
             if (!res.ok) {
                 const err = await res.json();
-                setErrors({totp: err.message || "Invalid TOTP code"});
+                setErrors({totp: err.message || t("common.auth.totp_invalid")});
                 setIsLoading(false);
                 return;
             }
 
             router.push("/dashboard");
         } catch (err) {
-            setErrors({totp: "Something went wrong. Please try again."});
+            setErrors({totp: t("common.errors.err_smth_went_wrong")});
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -129,7 +132,7 @@ const LoginForm = () => {
             const { success, error, totp_required } = await login(formState.email, formState.password);
 
             if (!success) {
-                setErrors({ general: error || "Login failed" });
+                setErrors({ general: error || t("common.errors.err_login_failed") });
                 setIsLoading(false);
                 return;
             }
@@ -144,7 +147,7 @@ const LoginForm = () => {
             // If no TOTP required, proceed with navigation
             router.push("/discover");
         } catch (err: any) {
-            setErrors({general: "Something went wrong. Please try again."});
+            setErrors({general: t("common.errors.err_smth_went_wrong")});
             setIsLoading(false);
         }
     }, [formState, validateForm, login, router]);
@@ -157,16 +160,16 @@ const LoginForm = () => {
                     <div className="mx-auto h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mb-4">
                         <Shield className="h-8 w-8 text-indigo-600 dark:text-indigo-300" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Two-Factor Authentication</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{t("common.auth.verification.title")}</h2>
                     <p className="mt-2 text-gray-600 dark:text-gray-400">
-                        Please enter the 6-digit code from your authenticator app
+                        {t("common.auth.verification.code_prompt")}
                     </p>
                 </div>
 
                 <form className="space-y-4" onSubmit={handleSubmitTotp} noValidate>
                     <div>
                         <label htmlFor="totp-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Authentication Code
+                            {t("common.auth.verification.code_label")}
                         </label>
                         <input
                             type="text"
@@ -193,7 +196,7 @@ const LoginForm = () => {
                         className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50"
                         aria-busy={isLoading}
                     >
-                        {isLoading ? "Verifying..." : "Verify"}
+                        {isLoading ? t("common.auth.verification.verifying") : t("common.auth.verification.verify")}
                     </button>
 
                     <button
@@ -205,7 +208,7 @@ const LoginForm = () => {
                         }}
                         className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition duration-300"
                     >
-                        Back to Login
+                        {t("common.auth.back_to_login")}
                     </button>
                 </form>
             </div>
@@ -215,12 +218,12 @@ const LoginForm = () => {
     // Default login form
     return (
         <div className="max-w-md mx-auto">
-            <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">Login</h2>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">{t("common.auth.login_title")}</h2>
 
             <form className="space-y-4" onSubmit={handleSubmit} noValidate>
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email
+                        {t("common.auth.email")}
                     </label>
                     <input
                         type="email"
@@ -241,7 +244,7 @@ const LoginForm = () => {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Password
+                        {t("common.auth.password")}
                     </label>
                     <input
                         type="password"
@@ -272,21 +275,21 @@ const LoginForm = () => {
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50"
                     aria-busy={isLoading}
                 >
-                    {isLoading ? "Logging in..." : "Login"}
+                    {isLoading ? t("common.auth.verification.logging_in") : t("common.auth.login_title")}
                 </button>
             </form>
 
             <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
-                Don't have an account?{" "}
+                {t("common.auth.no_account")+ " "}
                 <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Sign up
+                    {t("common.auth.signup_title")}
                 </Link>
             </p>
 
             <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
-                Forgot your password?{" "}
+                {t("common.auth.forgot_password") + " "}
                 <Link href="/password-reset-request" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Change it here
+                    {t("common.auth.change_password_here")}
                 </Link>
             </p>
         </div>

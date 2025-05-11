@@ -6,6 +6,7 @@ import {parseJWToken} from "@/lib/utils";
 import {authFetch, baseURL, getCSRFToken} from "@/lib/api";
 import {cookies} from "next/headers";
 import {parseCookie} from "next/dist/compiled/@edge-runtime/cookies";
+import useTranslation from "@/lib/useTranslation";
 
 
 const ContactPage = () => {
@@ -20,7 +21,9 @@ const ContactPage = () => {
 
     const [loggedIn, setLoggedIn] = useState(false)
 
-    const pathname = usePathname()
+    const pathname = usePathname();
+
+    const {t} = useTranslation();
 
     const fetchProfile = async () => {
         try {

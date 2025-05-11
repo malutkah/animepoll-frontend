@@ -5,6 +5,7 @@ import { FormEvent, useState, useCallback, useEffect, memo } from "react"
 import { useRouter } from "next/navigation"
 import { Check, X, Eye } from "lucide-react";
 import { baseURL } from "@/lib/api";
+import useTranslation from "@/lib/useTranslation";
 
 interface FormState {
     email: string;
@@ -33,6 +34,8 @@ interface PasswordChecks {
 }
 
 const SignupForm = () => {
+    const {t} = useTranslation();
+
     const [formState, setFormState] = useState<FormState>({
         email: '',
         username: '',

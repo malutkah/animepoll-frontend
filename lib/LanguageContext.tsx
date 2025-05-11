@@ -44,6 +44,11 @@ export const translations = {
                     personalizationDesc: "Get recommendations and discover new anime based on your poll participation and preferences."
                 },
                 errors: {
+                    err_smth_went_wrong: "Something went wrong. Please try again",
+                    err_email_req: "Email is required",
+                    err_email_invalid: "Email is invalid",
+                    err_password_req: "Password is required",
+                    err_totp_invalid: "Please enter a valid 6-digit code",
                     err_get_profile: "Failed to load profile",
                     err_update_profile: "Failed to update profile",
                     err_countries: "Failed to load countries",
@@ -175,11 +180,13 @@ export const translations = {
                     mode: "The website is currently under maintenance. Some features are temporarily unavailable."
                 },
                 auth: {
+                    back_to_login: "Back to Login",
                     login_title: "Login",
                     signup_title: "Sign Up",
                     email: "Email",
                     username: "Username",
                     password: "Password",
+                    change_password_here: "Change it here",
                     confirm_password: "Confirm Password",
                     beta_key: "Beta Key",
                     forgot_password: "Forgot your password?",
@@ -187,6 +194,7 @@ export const translations = {
                     no_account: "Don't have an account?",
                     reset_password: "Reset Password",
                     check_email: "Check Your Email",
+                    totp_invalid: "Invalid TOTP code",
                     reset_link_sent: "We've sent a password reset link to {0}. Please check your inbox and follow the instructions.",
                     try_another_email: "Try another email",
                     password_criteria: {
@@ -197,6 +205,7 @@ export const translations = {
                     },
                     privacy_policy: "By submitting this form, I agree to the privacy policy",
                     verification: {
+                        logging_in: "Logging in...",
                         title: "Two-Factor Authentication",
                         code_prompt: "Please enter the 6-digit code from your authenticator app",
                         code_label: "Authentication Code",
@@ -327,6 +336,11 @@ export const translations = {
                     personalizationDesc: "Erhalte Empfehlungen und entdecke neue Anime basierend auf deiner Umfragenteilnahme und deinen Präferenzen."
                 },
                 errors: {
+                    err_smth_went_wrong: "Etwas ist schief gelaufen. Bitte versuchene es erneut",
+                    err_email_req: "E-Mail ist erforderlich",
+                    err_email_invalid: "E-Mail ist ungültig",
+                    err_password_req: "Passwort ist erforderlich",
+                    err_totp_invalid: "Bitte einen gültigen 6-stelligen Code eingeben",
                     err_get_profile: "Fehler beim Laden des Profils",
                     err_update_profile: "Fehler beim Aktualisieren des Profils",
                     err_countries: "Fehler beim Laden der Länder",
@@ -461,11 +475,13 @@ export const translations = {
                     mode: "Die Website wird derzeit gewartet. Einige Funktionen sind vorübergehend nicht verfügbar."
                 },
                 auth: {
+                    back_to_login: "Zurück zum Login",
                     login_title: "Anmelden",
                     signup_title: "Registrieren",
                     email: "E-Mail",
                     username: "Benutzername",
                     password: "Passwort",
+                    change_password_here: "Jetzt hier ändern",
                     confirm_password: "Passwort bestätigen",
                     beta_key: "Beta-Schlüssel",
                     forgot_password: "Passwort vergessen?",
@@ -473,6 +489,7 @@ export const translations = {
                     no_account: "Hast du noch kein Konto?",
                     reset_password: "Passwort zurücksetzen",
                     check_email: "Überprüfe deine E-Mail",
+                    totp_invalid: "Üngültiger TOTP Code",
                     reset_link_sent: "Wir haben einen Link zum Zurücksetzen deines Passworts an {0} gesendet. Bitte überprüfe deinen Posteingang und folge den Anweisungen.",
                     try_another_email: "Andere E-Mail-Adresse versuchen",
                     password_criteria: {
@@ -483,6 +500,7 @@ export const translations = {
                     },
                     privacy_policy: "Mit dem Absenden dieses Formulars stimme ich der Datenschutzerklärung zu",
                     verification: {
+                        logging_in: "Einloggen...",
                         title: "Zwei-Faktor-Authentifizierung",
                         code_prompt: "Bitte gib den 6-stelligen Code aus deiner Authentifizierungs-App ein",
                         code_label: "Authentifizierungscode",
