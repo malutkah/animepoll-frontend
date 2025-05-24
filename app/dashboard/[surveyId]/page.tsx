@@ -99,7 +99,7 @@ const SurveyDetailPage = () => {
             setGenres(data);
         } catch (err) {
             setError("Failed getting genres");
-            console.log(err);
+            console.error(err);
         }
     };
 
@@ -108,7 +108,7 @@ const SurveyDetailPage = () => {
             const res = await authFetch(`/poll/survey/${params.surveyId}/questions`)
             if (res.status !== 200) {
                 const err = await res.json()
-                console.log(err)
+                console.error(err)
                 setError(err.message || "Failed to load questions")
                 return
             }
@@ -129,13 +129,14 @@ const SurveyDetailPage = () => {
                 setError(err.message || t('common.errors.err_results_load'));
                 return;
             }
+
             const data: AggregatedSurveyResult = await res.json();
             if (data && data.questions) {
                 const aggr = data.questions.reduce((acc: { [key: string]: AggregatedQuestionResult }, q) => {
                     acc[q.question_id] = q;
                     return acc;
                 }, {});
-                console.log('aggr', aggr)
+                //console.log('aggr', aggr)
                 setAggregatedResults(aggr);
                 if (!survey) {
                     setSurvey({

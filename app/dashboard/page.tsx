@@ -58,7 +58,7 @@ const DashboardPage = () => {
 
         } catch (err) {
             setError(t('common.errors.err_genres_load'));
-            console.log(err)
+             console.error(err)
         } finally {
         }
     }

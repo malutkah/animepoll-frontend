@@ -108,7 +108,7 @@ const PublicSurveyPage = () => {
             setGenres(data);
         } catch (err) {
             setError(t("common.errors.err_get_genres"));
-            console.log(err);
+            console.error(err);
         }
     };
 

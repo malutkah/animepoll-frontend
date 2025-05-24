@@ -122,7 +122,7 @@ const ProfilePage = () => {
                     body: data,
                 })
 
-                console.log(await res)
+                //console.log(await res)
             }
 
         }

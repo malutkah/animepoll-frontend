@@ -56,7 +56,7 @@ const ContactPage = () => {
         e.preventDefault();
         const data = {email,name, message}
 
-        console.log('form data', data)
+        // console.log('form data', data)
 
         try {
             const res = await fetch(baseURL()+"/user/contact", {

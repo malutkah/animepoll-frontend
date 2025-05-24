@@ -70,7 +70,7 @@ const CreateSurveyPage = () => {
         } catch (err) {
             setIsLoading(false);
             setError(t('common.errors.err_genre_load'));
-            console.log(err)
+            console.error(err)
         } finally {
             setIsLoading(false)
         }
@@ -78,11 +78,9 @@ const CreateSurveyPage = () => {
 
     const handleGenreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = e.target.value;
-        console.log('selected',selected)
 
         const g = genres.find((g: AnimeGenre) => g.name === selected);
 
-        console.log('g',g)
         if (g) {
             setGenre(g.name)
             setGenreId(g.id)
