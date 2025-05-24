@@ -22,7 +22,7 @@ export function getCSRFToken(): string {
 export async function authFetch(endpoint: string, options: RequestInit = {}) {
     const csrfToken = getCSRFToken();
 
-    console.log('csrfToken', csrfToken)
+    // console.log('csrfToken', csrfToken)
 
     const headers = new Headers(options.headers || {});
 
