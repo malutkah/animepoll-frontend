@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+// todo: add and implement translations
+
 const SignupSuccessPage = () => {
     const router = useRouter()
 
@@ -14,7 +16,7 @@ const SignupSuccessPage = () => {
         <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
             <div className="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded relative text-center">
                 <p className="text-xl font-semibold mb-4">
-                    Registration successful! You can now log in.
+                    Registration almost finished! You received an email with further information on how to activate your account.
                 </p>
                 <div className="flex justify-center space-x-4">
                     <Link href="/login">
