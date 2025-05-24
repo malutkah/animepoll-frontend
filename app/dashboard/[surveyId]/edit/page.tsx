@@ -612,12 +612,12 @@ const EditSurveyPage = () => {
                                 className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${
                                     disableSurveyUpdate || (enableTimeframe && (!startDate || !endDate)) ? disabledButtonClasses : ""
                                 }`}
-                                onClick={(e) => {
-                                    if (enableTimeframe && !validateDateRange()) {
-                                        e.preventDefault();
-                                        return;
-                                    }
-                                }}
+                                // onClick={(e) => {
+                                //     if (enableTimeframe && !validateDateRange()) {
+                                //         e.preventDefault();
+                                //         return;
+                                //     }
+                                // }}
                             >
                                 {updateLoading ? t("common.updating") : t("common.survey.update_survey")}
                             </button>
