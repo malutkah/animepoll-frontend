@@ -74,6 +74,11 @@ export const translations = {
                     err_question_update: "Failed to update question",
                     err_surveys_load: "Failed to load public surveys",
                     err_responses_submit: "Failed to submit responses",
+                    // New error messages for signup form
+                    err_username_req: "Please enter a username",
+                    err_confirm_password_req: "Please confirm your password",
+                    err_beta_key_req: "Please enter your beta key",
+                    err_privacy_policy_req: "You must accept the privacy policy"
                 },
                 success: {
                     succ_update_profile: "Profile updated successfully",
@@ -197,6 +202,10 @@ export const translations = {
                     totp_invalid: "Invalid TOTP code",
                     reset_link_sent: "We've sent a password reset link to {0}. Please check your inbox and follow the instructions.",
                     try_another_email: "Try another email",
+                    // New properties for signup form
+                    show_password: "Show password",
+                    hide_password: "Hide password",
+                    signing_up: "Signing Up...",
                     password_criteria: {
                         length: "Password contains at least 8 characters",
                         chars: "Password contains letters (A-Z, a-z) and allowed characters (!?,.#&$'\"@;*#_)",
@@ -367,6 +376,11 @@ export const translations = {
                     err_question_update: "Fehler beim Aktualisieren der Frage",
                     err_surveys_load: "Fehler beim Laden der öffentlichen Umfragen",
                     err_responses_submit: "Fehler beim Senden der Antworten",
+                    // New error messages for signup form
+                    err_username_req: "Bitte gib einen Benutzernamen ein",
+                    err_confirm_password_req: "Bitte bestätige dein Passwort",
+                    err_beta_key_req: "Bitte gib deinen Beta-Schlüssel ein",
+                    err_privacy_policy_req: "Du musst der Datenschutzerklärung zustimmen"
                 },
                 success: {
                     succ_update_profile: "Profil erfolgreich aktualisiert",
@@ -492,6 +506,10 @@ export const translations = {
                     totp_invalid: "Üngültiger TOTP Code",
                     reset_link_sent: "Wir haben einen Link zum Zurücksetzen deines Passworts an {0} gesendet. Bitte überprüfe deinen Posteingang und folge den Anweisungen.",
                     try_another_email: "Andere E-Mail-Adresse versuchen",
+                    // New properties for signup form
+                    show_password: "Passwort anzeigen",
+                    hide_password: "Passwort verbergen",
+                    signing_up: "Registriere...",
                     password_criteria: {
                         length: "Passwort enthält mindestens 8 Zeichen",
                         chars: "Passwort enthält Buchstaben (A-Z, a-z) und erlaubte Sonderzeichen (!?,.#&$'\"@;*#_)",
