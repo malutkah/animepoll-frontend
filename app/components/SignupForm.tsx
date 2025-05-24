@@ -35,6 +35,7 @@ interface PasswordChecks {
 
 const SignupForm = () => {
     const {t} = useTranslation();
+    const betaMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
 
     const [formState, setFormState] = useState<FormState>({
         email: '',
@@ -109,52 +110,52 @@ const SignupForm = () => {
 
         // Username validation
         if (!formState.username) {
-            newErrors.username = "Please enter a username";
+            newErrors.username = t("common.errors.err_username_req");
             valid = false;
         }
 
         // Email validation
         if (!formState.email) {
-            newErrors.email = "Please enter an email";
+            newErrors.email = t("common.errors.err_email_req");
             valid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-            newErrors.email = "Invalid email format";
+            newErrors.email = t("common.errors.err_email_invalid");
             valid = false;
         }
 
         // Password validation
         if (!formState.password) {
-            newErrors.password = "Please enter a password";
+            newErrors.password = t("common.errors.err_password_req");
             valid = false;
         } else if (!isPasswordValid) {
-            newErrors.password = "Password does not meet requirements";
+            newErrors.password = t("common.errors.err_password_requirements");
             valid = false;
         }
 
         // Confirm password validation
         if (!formState.password2) {
-            newErrors.password2 = "Please confirm your password";
+            newErrors.password2 = t("common.errors.err_confirm_password_req");
             valid = false;
         } else if (formState.password !== formState.password2) {
-            newErrors.password2 = "Passwords do not match";
+            newErrors.password2 = t("common.errors.err_password_match");
             valid = false;
         }
 
         // Beta key validation
-        if (!formState.betaKey) {
-            newErrors.betaKey = "Please enter your beta key";
+        if (betaMode && !formState.betaKey) {
+            newErrors.betaKey = t("common.errors.err_beta_key_req");
             valid = false;
         }
 
         // Legal acceptance validation
         if (!formState.acceptLegal) {
-            newErrors.acceptLegal = "You must accept the privacy policy";
+            newErrors.acceptLegal = t("common.errors.err_privacy_policy_req");
             valid = false;
         }
 
         setErrors(newErrors);
         return valid;
-    }, [formState, isPasswordValid]);
+    }, [formState, isPasswordValid, t, betaMode]);
 
     // Form submission
     const handleSubmit = useCallback(async (e: FormEvent) => {
@@ -174,14 +175,14 @@ const SignupForm = () => {
                     email: formState.email,
                     username: formState.username,
                     password: formState.password,
-                    beta_key: formState.betaKey
+                    beta_key: betaMode ? formState.betaKey : "",
                 }),
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                setErrors({ general: data.message || "Something went wrong." });
+                setErrors({ general: data.message || t("common.errors.err_smth_went_wrong") });
                 setIsLoading(false);
                 return;
             }
@@ -189,10 +190,10 @@ const SignupForm = () => {
             // On successful registration, redirect to the success page
             router.push("/signup/success");
         } catch (err: any) {
-            setErrors({ general: "Something went wrong. Please try again later." });
+            setErrors({ general: t("common.errors.err_smth_went_wrong") });
             setIsLoading(false);
         }
-    }, [formState, validateForm, router]);
+    }, [formState, validateForm, router, t, betaMode]);
 
     // Password visibility toggle handlers
     const handleMouseDown = useCallback(() => setShowPassword(true), []);
@@ -212,12 +213,12 @@ const SignupForm = () => {
 
     return (
         <div className="max-w-md mx-auto">
-            <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">Sign Up</h2>
+            <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">{t("common.auth.signup_title")}</h2>
             <form className="space-y-4" onSubmit={handleSubmit} noValidate>
                 {/* Username */}
                 <div>
                     <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Username
+                        {t("common.auth.username")}
                     </label>
                     <input
                         type="text"
@@ -237,7 +238,7 @@ const SignupForm = () => {
                 {/* Email */}
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email
+                        {t("common.auth.email")}
                     </label>
                     <input
                         type="email"
@@ -257,7 +258,7 @@ const SignupForm = () => {
                 {/* Password */}
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Password
+                        {t("common.auth.password")}
                     </label>
                     <div className="relative">
                         <input
@@ -278,7 +279,7 @@ const SignupForm = () => {
                             onMouseUp={handleMouseUp}
                             onMouseLeave={handleMouseUp}
                             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={showPassword ? t("common.auth.hide_password") : t("common.auth.show_password")}
                         >
                             <Eye className="h-5 w-5"/>
                         </button>
@@ -289,7 +290,7 @@ const SignupForm = () => {
                 {/* Confirm Password */}
                 <div>
                     <label htmlFor="password2" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Confirm Password
+                        {t("common.auth.confirm_password")}
                     </label>
                     <div className="relative">
                         <input
@@ -310,7 +311,7 @@ const SignupForm = () => {
                             onMouseUp={handleMouseUp2}
                             onMouseLeave={handleMouseUp2}
                             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
-                            aria-label={showPassword2 ? "Hide confirmed password" : "Show confirmed password"}
+                            aria-label={showPassword2 ? t("common.auth.hide_password") : t("common.auth.show_password")}
                         >
                             <Eye className="h-5 w-5"/>
                         </button>
@@ -320,42 +321,45 @@ const SignupForm = () => {
                     <div className="mt-3">
                         <PasswordCriteriaItem
                             passed={passwordChecks.length}
-                            text="Password contains at least 8 characters"
+                            text={t("common.auth.password_criteria.length")}
                         />
                         <PasswordCriteriaItem
                             passed={passwordChecks.chars}
-                            text="Password contains letters (A-Z, a-z) and allowed characters (!?,.#&$'\@;*#_)"
+                            text={t("common.auth.password_criteria.chars")}
                         />
                         <PasswordCriteriaItem
                             passed={passwordChecks.space}
-                            text="Password does not contain spaces"
+                            text={t("common.auth.password_criteria.space")}
                         />
                         <PasswordCriteriaItem
                             passed={passwordChecks.digits}
-                            text="Password contains at least one digit (0-9)"
+                            text={t("common.auth.password_criteria.digits")}
                         />
                     </div>
                 </div>
 
                 {/* Beta Key */}
-                <div>
-                    <label htmlFor="betakey" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Enter your Beta Key
-                    </label>
-                    <input
-                        type="password"
-                        id="betakey"
-                        name="betaKey"
-                        value={formState.betaKey}
-                        onChange={handleChange}
-                        className={`mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border ${
-                            errors.betaKey ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
-                        } rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
-                        aria-invalid={errors.betaKey ? "true" : "false"}
-                        aria-describedby={errors.betaKey ? "betakey-error" : undefined}
-                    />
-                    {errors.betaKey && <p id="betakey-error" className="mt-2 text-red-400 text-sm">{errors.betaKey}</p>}
-                </div>
+                {betaMode ? (
+                    <div>
+                        <label htmlFor="betakey" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t("common.auth.beta_key")}
+                        </label>
+                        <input
+                            type="password"
+                            id="betakey"
+                            name="betaKey"
+                            value={formState.betaKey}
+                            onChange={handleChange}
+                            className={`mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-800 border ${
+                                errors.betaKey ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                            } rounded shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                            aria-invalid={errors.betaKey ? "true" : "false"}
+                            aria-describedby={errors.betaKey ? "betakey-error" : undefined}
+                        />
+                        {errors.betaKey && <p id="betakey-error" className="mt-2 text-red-400 text-sm">{errors.betaKey}</p>}
+                    </div>
+                ): null}
+
 
                 {/* Legal Agreement */}
                 <div>
@@ -371,9 +375,9 @@ const SignupForm = () => {
                             aria-describedby={errors.acceptLegal ? "accept-legal-error" : undefined}
                         />
                         <span>
-                            By submitting this form, I agree to the
+                            {t("common.auth.privacy_policy")}
                             <Link href="/legal" target="_blank" className="ml-1 text-indigo-600 dark:text-indigo-400 hover:underline">
-                                privacy policy
+                                {t("common.legal.legal")}
                             </Link>
                         </span>
                     </label>
@@ -394,14 +398,14 @@ const SignupForm = () => {
                     className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50"
                     aria-busy={isLoading}
                 >
-                    {isLoading ? "Signing Up..." : "Sign Up"}
+                    {isLoading ? t("common.auth.signing_up") : t("common.auth.signup_title")}
                 </button>
             </form>
 
             <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
-                Already have an account?{" "}
+                {t("common.auth.have_account") + " "}
                 <Link href="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                    Login
+                    {t("common.auth.login_title")}
                 </Link>
             </p>
         </div>
